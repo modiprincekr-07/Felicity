@@ -27,13 +27,13 @@ class PreferencesViewModel(application: Application) : WrappedViewModel(applicat
         viewModelScope.launch(Dispatchers.Default) {
             val preferences = mutableListOf<Preference>()
 
-            if (TrialPreferences.isFullVersion().not()) {
+            /*if (TrialPreferences.isFullVersion().not()) {
                 preferences.add(Preference(
                         title = R.string.purchase,
                         description = R.string.purchase_desc,
                         icon = R.drawable.ic_sell
                 ))
-            }
+            }*/
 
             preferences.add(
                     Preference(
