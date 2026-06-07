@@ -29,12 +29,15 @@ import app.simple.felicity.dialogs.app.AudioPipelineDialog.Companion.showAudioPi
 import app.simple.felicity.dialogs.player.VisualizerConfig.Companion.showVisualizerConfig
 import app.simple.felicity.engine.managers.MediaPlaybackManager
 import app.simple.felicity.engine.managers.VisualizerManager
+import app.simple.felicity.engine.usb.UsbDacManager
 import app.simple.felicity.engine.utils.PcmInfoFormatter
 import app.simple.felicity.glide.util.AudioCoverUtils.loadArtCover
+import app.simple.felicity.glide.util.AudioCoverUtils.loadArtCoverWithPayload
 import app.simple.felicity.preferences.AlbumArtPreferences
 import app.simple.felicity.preferences.AudioPreferences
 import app.simple.felicity.preferences.PlayerPreferences
 import app.simple.felicity.preferences.UserInterfacePreferences
+import app.simple.felicity.preferences.VisualizerPreferences
 import app.simple.felicity.repository.constants.MediaConstants
 import app.simple.felicity.repository.models.Audio
 import app.simple.felicity.repository.utils.AudioUtils.getProperAlbum
@@ -161,6 +164,8 @@ abstract class BasePlayerFragment : MediaFragment() {
         requireImmersiveMode()
         updateState()
         setVisualizerState()
+        setVisualizerCapsState()
+        setLyricsState()
 
         // Mirror swipe-down-to-close behavior on the album art pager so that a downward
         // swipe on the cover image dismisses the player, exactly like swiping on any other
@@ -187,16 +192,29 @@ abstract class BasePlayerFragment : MediaFragment() {
                         count = MediaPlaybackManager.getSongs().size,
                         provider = { pos, iv ->
                             val audio = MediaPlaybackManager.getSongs()[pos]
-                            iv.loadArtCover(audio,
-                                            shadow = false,
-                                            crop = true,
-                                            roundedCorners = false,
-                                            blur = false,
-                                            greyscale = AlbumArtPreferences.isGreyscaleEnabled(),
-                                            darken = false)
+                            if (UserInterfacePreferences.isCarouselInterface()) {
+                                iv.loadArtCoverWithPayload(audio)
+                            } else {
+                                iv.loadArtCover(audio,
+                                                shadow = false,
+                                                crop = true,
+                                                roundedCorners = false,
+                                                blur = false,
+                                                greyscale = AlbumArtPreferences.isGreyscaleEnabled(),
+                                                darken = false)
+                            }
+                        },
+                        scaleType = if (UserInterfacePreferences.isCarouselInterface()) {
+                            ImageView.ScaleType.FIT_CENTER
+                        } else {
+                            ImageView.ScaleType.CENTER_CROP
                         },
                         canceller = { iv ->
                             Glide.with(iv).clear(iv)
+                        },
+                        onLongClick = { pos, iv ->
+                            openMenu()
+                            true
                         }
                 ).also { imagePageAdapter = it },
         )
@@ -266,24 +284,7 @@ abstract class BasePlayerFragment : MediaFragment() {
         }
 
         menu.setOnClickListener {
-            when (UserInterfacePreferences.getPlayerInterface()) {
-                UserInterfacePreferences.PLAYER_INTERFACE_DEFAULT -> {
-                    openSongsMenu(
-                            audios = MediaPlaybackManager.getSongs(),
-                            position = MediaPlaybackManager.getCurrentSongPosition(),
-                            imageView = pager.getCurrentImageView(),
-                            showBookmarks = true
-                    )
-                }
-                UserInterfacePreferences.PLAYER_INTERFACE_FADED -> {
-                    openSongsMenu(
-                            audios = MediaPlaybackManager.getSongs(),
-                            position = MediaPlaybackManager.getCurrentSongPosition(),
-                            showBookmarks = true,
-                            imageView = null // No shared element transition on the faded player variant
-                    )
-                }
-            }
+            openMenu()
         }
 
         repeat.setOnClickListener {
@@ -299,7 +300,7 @@ abstract class BasePlayerFragment : MediaFragment() {
 
         pcmInfo.setOnClickListener {
             // TODO - remove this when we have audio processor support on 32bit mode
-            if (AudioPreferences.isHiresOutputEnabled().not()) {
+            if (shouldShowProcessors()) {
                 showAudioPipeline(anchorView = pcmInfo)
             } else {
                 showWarning("All processors are disabled. PCM info is not available in 32-bit output mode.")
@@ -359,7 +360,7 @@ abstract class BasePlayerFragment : MediaFragment() {
         }
 
         equalizer.setOnClickListener {
-            if (AudioPreferences.isHiresOutputEnabled().not()) {
+            if (shouldShowProcessors()) {
                 openFragment(Equalizer.newInstance(), Equalizer.TAG)
             } else {
                 showWarning("All processors are disabled. EQ is not available in 32-bit output mode.")
@@ -367,7 +368,7 @@ abstract class BasePlayerFragment : MediaFragment() {
         }
 
         visualizerButton.setOnClickListener {
-            if (AudioPreferences.isHiresOutputEnabled().not()) {
+            if (shouldShowProcessors()) {
                 childFragmentManager.showVisualizerConfig()
             } else {
                 showWarning("All processors are disabled. Visualizers are not available in 32-bit output mode.")
@@ -378,12 +379,17 @@ abstract class BasePlayerFragment : MediaFragment() {
         // are both open, they both read from the exact same StateFlow so they always agree.
         viewLifecycleOwner.lifecycleScope.launch {
             lyricsViewModel.lrcData.collect { lrcData ->
-                if (lrcData == null || lrcData.isEmpty) {
-                    Log.d(TAG, "No lyrics found for the current song.")
+                if (PlayerPreferences.isShowLyrics()) {
+                    if (lrcData == null || lrcData.isEmpty) {
+                        Log.d(TAG, "No lyrics found for the current song.")
+                    } else {
+                        Log.d(TAG, "Loaded lyrics with ${lrcData.size()} lines.")
+                        lrc.setLrcData(
+                                lrcData, MediaPlaybackManager.getSeekPosition() + lyricsViewModel.syncOffset)
+                    }
                 } else {
-                    Log.d(TAG, "Loaded lyrics with ${lrcData.size()} lines.")
-                    lrc.setLrcData(
-                            lrcData, MediaPlaybackManager.getSeekPosition() + lyricsViewModel.syncOffset)
+                    lrc.clear()
+                    Log.d(TAG, "Lyrics are disabled in preferences; skipping LRC update.")
                 }
             }
         }
@@ -407,7 +413,7 @@ abstract class BasePlayerFragment : MediaFragment() {
     }
 
     private fun setVisualizerState() {
-        if (PlayerPreferences.isVisualizerEnabled()) {
+        if (PlayerPreferences.isVisualizerEnabled() && shouldShowProcessors()) {
             // Wire the visualizer view's twin buffers directly to the audio processor so the
             // audio thread can write FFT magnitudes without any intermediate coroutine hop.
             // setDirectOutput is a no-op when the processor is not yet available (service not
@@ -423,6 +429,36 @@ abstract class BasePlayerFragment : MediaFragment() {
         }
 
         visualizer.visibility = if (PlayerPreferences.isVisualizerEnabled()) View.VISIBLE else View.GONE
+    }
+
+    private fun setVisualizerCapsState() {
+        visualizer.setCapsEnabled(VisualizerPreferences.areCapsEnabled())
+    }
+
+    private fun setLyricsState() {
+        lrc.visibility = if (PlayerPreferences.isShowLyrics()) View.VISIBLE else View.GONE
+    }
+
+    private fun openMenu() {
+        when (UserInterfacePreferences.getPlayerInterface()) {
+            UserInterfacePreferences.PLAYER_INTERFACE_DEFAULT,
+            UserInterfacePreferences.PLAYER_INTERFACE_CAROUSEL -> {
+                openSongsMenu(
+                        audios = MediaPlaybackManager.getSongs(),
+                        position = MediaPlaybackManager.getCurrentSongPosition(),
+                        imageView = pager.getCurrentImageView(),
+                        showBookmarks = true
+                )
+            }
+            UserInterfacePreferences.PLAYER_INTERFACE_FADED -> {
+                openSongsMenu(
+                        audios = MediaPlaybackManager.getSongs(),
+                        position = MediaPlaybackManager.getCurrentSongPosition(),
+                        showBookmarks = true,
+                        imageView = null // No shared element transition on the faded player variant
+                )
+            }
+        }
     }
 
     private fun updateState() {
@@ -589,6 +625,10 @@ abstract class BasePlayerFragment : MediaFragment() {
         }
     }
 
+    private fun shouldShowProcessors(): Boolean {
+        return AudioPreferences.shouldShowProcessors() || UsbDacManager.isActive
+    }
+
     override val wantsMiniPlayerVisible: Boolean
         get() = false
 
@@ -605,6 +645,9 @@ abstract class BasePlayerFragment : MediaFragment() {
         when (key) {
             PlayerPreferences.VISUALIZER_ENABLED -> {
                 setVisualizerState()
+            }
+            VisualizerPreferences.CAPS_ENABLED -> {
+                setVisualizerCapsState()
             }
             PlayerPreferences.WAVEFORM_MODE -> {
                 seekbar.waveformMode = PlayerPreferences.getWaveformMode()

@@ -84,9 +84,17 @@ class NativeDspAudioProcessor(
     private var tagReplayGainLinearGain: Float = 1f
 
     /**
-     * Whether the EQ stage is enabled inside the native engine.
-     * Mirrored to [DspProcessor] immediately on write.
+     * When set to `true`, [queueInput] becomes a transparent passthrough — the buffer is
+     * returned from [getOutput] unchanged and no DSP is applied. This lets [FelicityAudioSink]
+     * own the DSP execution when USB or AAudio is the active output, while still keeping this
+     * processor in [DefaultAudioSink]'s chain so the AudioTrack fallback path is unaffected.
+     *
+     * [FelicityAudioSink] sets this flag at the top of each [handleBuffer] call based on
+     * which output is currently live, so the correct path is always used for every buffer
+     * without any race conditions.
      */
+    @Volatile
+    var isBypassedForDirectOutput: Boolean = false
     @Volatile
     var eqEnabled: Boolean = true
         set(value) {
@@ -138,6 +146,26 @@ class NativeDspAudioProcessor(
     /** Room size parameter in [0.0, 1.0]; 0 = small room, 1 = large hall. */
     @Volatile
     private var reverbSize: Float = 0.5f
+
+    /**
+     * Stores the most recent PEQ (parametric EQ) gain array so it can be re-pushed to the
+     * native engine whenever a new [DspProcessor] context is created after a format change.
+     * Empty when the app is in graphic EQ mode.
+     */
+    private var peqGains: FloatArray = FloatArray(0)
+
+    /**
+     * Stores the most recent PEQ center-frequency array — one entry per parametric band, in Hz.
+     * Empty when the app is in graphic EQ mode.
+     */
+    private var peqFreqs: FloatArray = FloatArray(0)
+
+    /**
+     * Stores the most recent PEQ Q-factor array — one entry per parametric band.
+     * Higher Q means a narrower peak; lower Q affects a wider frequency range.
+     * Empty when the app is in graphic EQ mode.
+     */
+    private var peqQValues: FloatArray = FloatArray(0)
 
     /**
      * Hardware audio output latency in milliseconds last reported by the service layer.
@@ -257,7 +285,14 @@ class NativeDspAudioProcessor(
      *                    exactly [ByteBuffer.remaining] bytes on return.
      */
     override fun queueInput(inputBuffer: ByteBuffer) {
-        if (!active) {
+        /**
+         * When [FelicityAudioSink] is driving a USB DAC or AAudio stream, it processes
+         * the audio itself via [processInPlace] and only uses [DefaultAudioSink] as a
+         * silent timekeeper. In that scenario we turn this into a transparent passthrough
+         * so [DefaultAudioSink]'s chain doesn't process (and waste CPU on) the same
+         * audio that the intercept branch already processed.
+         */
+        if (!active || isBypassedForDirectOutput) {
             outputBuffer = inputBuffer
             return
         }
@@ -391,6 +426,60 @@ class NativeDspAudioProcessor(
     }
 
     /**
+     * Processes a float array in-place using the full native DSP chain (EQ, bass, treble,
+     * stereo widening, balance, saturation, reverb) plus pre-amplification.
+     *
+     * This is the direct-output hot path called by [FelicityAudioSink] when USB or AAudio
+     * is active. Because [isBypassedForDirectOutput] makes [queueInput] a passthrough in
+     * that mode, the same [DspProcessor] context is used exclusively by this call — there
+     * is no risk of processing the same audio twice.
+     *
+     * The native engine also updates the shared [FFTContext] on every call, so the
+     * spectrum visualizer keeps working even when [DefaultAudioSink]'s chain is bypassed.
+     *
+     * @param samples Interleaved stereo (or mono) float PCM samples, modified in-place.
+     *                The array must contain exactly the frame count × channel count samples.
+     */
+    fun processInPlace(samples: FloatArray) {
+        processInPlace(samples, samples.size)
+    }
+
+    /**
+     * Same as [processInPlace] but only treats the first [length] elements of [samples]
+     * as valid audio. When [samples] is exactly [length] elements the array is processed
+     * directly with zero allocation — this is the steady-state fast path.
+     *
+     * When [samples] is larger than [length] (the reusable scratch buffer was grown for a
+     * bigger previous frame), we trim to a copy, run the DSP, then write the results back
+     * into [samples[0..[length])] so the caller sees fully processed data. Without the
+     * copy-back step the caller would push the original unprocessed bytes to hardware and
+     * EQ / preamp / bass / treble would appear to have no effect at all.
+     *
+     * @param samples  Buffer that holds the audio data (may be larger than [length]).
+     * @param length   Number of valid samples at the start of [samples].
+     */
+    fun processInPlace(samples: FloatArray, length: Int) {
+        val dsp = dspProcessor ?: return
+        val preamp = preampLinearGain * replayGainLinearGain * tagReplayGainLinearGain
+
+        if (samples.size == length) {
+            if (preamp != 1f) {
+                for (i in 0 until length) samples[i] *= preamp
+            }
+            dsp.processAudio(samples)
+        } else {
+            // Work on a correctly-sized copy so the native engine only sees valid frames,
+            // then write the processed values back so the caller's push uses correct data.
+            val slice = samples.copyOf(length)
+            if (preamp != 1f) {
+                for (i in 0 until length) slice[i] *= preamp
+            }
+            dsp.processAudio(slice)
+            slice.copyInto(samples, endIndex = length)
+        }
+    }
+
+    /**
      * Sets the pre-amplifier gain and recomputes the internal linear scale factor.
      *
      * @param db Gain in dB, clamped to [-15, +15]. 0 dB = unity (no change).
@@ -484,7 +573,26 @@ class NativeDspAudioProcessor(
     }
 
     /**
-     * Sets the treble high-shelf gain. Internally passes the full band state so the
+     * Pushes a parametric EQ configuration to the native engine, overriding the current
+     * fixed-frequency 10-band state. Each band can have its own center frequency and Q,
+     * giving the user full control over the filter shape — ideal for surgical corrections
+     * that the fixed graphic bands can't target precisely.
+     *
+     * Calling this while in graphic mode is safe but won't take audible effect until
+     * [eqEnabled] is true and the DSP engine applies the bands.
+     *
+     * @param gains    Per-band gain in dB.
+     * @param freqs    Per-band center frequency in Hz.
+     * @param qValues  Per-band Q factor.
+     */
+    fun setPeqBands(gains: FloatArray, freqs: FloatArray, qValues: FloatArray) {
+        peqGains = gains.copyOf()
+        peqFreqs = freqs.copyOf()
+        peqQValues = qValues.copyOf()
+        dspProcessor?.setPeqBands(peqGains, peqFreqs, peqQValues)
+    }
+
+    /** Sets the treble high-shelf gain. Internally passes the full band state so the
      * native engine always has a consistent coefficient set.
      *
      * @param db Gain in dB, clamped to [-12, +12].
@@ -564,7 +672,13 @@ class NativeDspAudioProcessor(
     /** Pushes all stored parameter fields to the native [DspProcessor] after (re)creation. */
     private fun pushAllParameters() {
         val dsp = dspProcessor ?: return
-        dsp.setEqBands(bandGains, bassDb, trebleDb)
+        // Re-apply the appropriate EQ state: if PEQ bands are loaded, push them; otherwise
+        // push the standard 10-band graphic EQ so the two modes don't step on each other.
+        if (peqGains.isNotEmpty()) {
+            dsp.setPeqBands(peqGains, peqFreqs, peqQValues)
+        } else {
+            dsp.setEqBands(bandGains, bassDb, trebleDb)
+        }
         dsp.setEqEnabled(eqEnabled)
         dsp.setStereoWidth(stereoWidth)
         dsp.setBalance(pan)

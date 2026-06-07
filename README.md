@@ -110,7 +110,7 @@ This feature list is not exhaustive and only main features are listed.
 - [x] Local server for centralized music access across multiple devices.
 - [x] Selection support for library management and playlist creation.
 - [x] Reproducible build
-- [ ] Parametric Equalizer
+- [x] Parametric Equalizer
 - [ ] Sleep Timer
 - [ ] Global Search Provider
 - [ ] More widgets
@@ -122,9 +122,9 @@ This feature list is not exhaustive and only main features are listed.
 Features that are planned but will not be a priority.
 
 - [ ] Cue sheet support
-- [ ] Native USB DAC support
-- [ ] Oboe
-- [ ] AAudio _(added but experimental)_
+- [x] Native USB DAC support (more tests needed)
+- [x] Oboe
+- [x] AAudio
 
 ... and more features will be updated here as development progresses.
 
@@ -140,7 +140,7 @@ Features that are planned but will not be a priority.
 | ![](/screenshots/18.png) | ![](/screenshots/19.png) | ![](/screenshots/20.png) |
 | ![](/screenshots/21.png) | ![](/screenshots/22.png) | ![](/screenshots/23.png) |
 | ![](/screenshots/24.png) | ![](/screenshots/25.png) | ![](/screenshots/26.gif) |
-| ![](/screenshots/27.png) |                          |                          |
+| ![](/screenshots/27.png) | ![](/screenshots/28.png) | ![](/screenshots/29.png) |
 
 | Artflow Interface        |
 |--------------------------|

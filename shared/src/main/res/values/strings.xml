@@ -4,6 +4,7 @@
     <string name="crash_report">Crash Report</string>
     <string name="close">Close</string>
     <string name="send">Send</string>
+    <string name="pick_artist_image">Pick Artist Image</string>
     <string name="the_app_has_crashed">The app has crashed</string>
     <string name="desc_not_available">Description not available</string>
     <string name="songs">Songs</string>
@@ -153,14 +154,10 @@
     <string name="not_granted">Not Granted</string>
     <string name="post_notifications">Post Notifications</string>
     <string name="desc_post_notifications">Required to show media player and other necessary notifications.</string>
-    <string name="manage_all_files">Manage All Files</string>
-    <string name="desc_manage_all_files">Required to delete, rename, or modify audio files and their metadata. Also needed to access sidecar files like subtitles (.srt), lyrics (.lrc), and cue sheets (.cue). Without this, modification features will be limited.</string>
     <string name="storage_folder_access">Storage Folder Access</string>
     <string name="desc_storage_folder_access">Tap to pick the music folder(s) you want Felicity to scan. You can add more folders later from Library settings. No broad storage permission is required, only the folders you choose.</string>
     <string name="read_media_audio">Read Media Audio</string>
     <string name="desc_read_media_audio">Allows Felicity to read audio files from MediaStore.</string>
-    <string name="add_folder">Add Folder</string>
-    <string name="granted_folders">Granted Folders</string>
     <string name="no_folders_granted">No folders added yet. Tap above to pick a music folder.</string>
     <string name="start_app_now">Start App Now</string>
     <string name="audio">Audio</string>
@@ -293,7 +290,6 @@
     <string name="style">Style</string>
     <string name="latency">Latency</string>
     <string name="particles">Particles</string>
-    <string name="hires_warning">Hi-Res (32-bit) output enables direct hardware passthrough for the purest audio signal. Because the audio bypasses the internal engine, the equalizer, bass, and visualizer will be disabled in this mode.</string>
     <string name="slide">Slide</string>
     <string name="typewriting">Typewriting</string>
     <string name="no_effect">No Effect</string>
@@ -314,7 +310,6 @@
     <string name="edit_metadata">Edit Metadata</string>
     <string name="metadata_saved">Metadata saved successfully.</string>
     <string name="comment">Comment</string>
-    <string name="change">Change</string>
 
     <!-- Audio Pipeline Dialog — section labels -->
     <string name="track_info">Track Info</string>
@@ -325,7 +320,6 @@
     <string name="resampler_type">Type</string>
     <string name="resampler_cutoff">Cutoff</string>
     <string name="quality">Quality</string>
-    <string name="dsp">DSP</string>
     <string name="pcm_format">PCM Format</string>
     <string name="eq_preset">EQ Preset</string>
     <string name="stereo_expand">Stereo Expand</string>
@@ -335,14 +329,15 @@
     <string name="disabled">Disabled</string>
     <string name="insert_and_play">Insert in Queue and Play</string>
 
-    <!-- AAudio low-latency output -->
     <string name="output">Output</string>
-    <string name="aaudio_enabled">AAudio (Low Latency)</string>
-    <string name="aaudio_enabled_summary">Use the AAudio API for a direct-to-HAL output path with significantly reduced latency.</string>
+    <string name="aaudio_desc">Bypasses the Android audio mixer and writes directly to the hardware for lower latency.</string>
     <string name="audio_output_mode">Output API</string>
+    <string name="output_sink">Output Sink</string>
+    <string name="output_sink_summary">Choose the audio API used to send processed audio to the hardware.</string>
+    <string name="audiotrack_desc">The standard Android audio pipeline. Compatible with all devices and the safest choice.</string>
+    <string name="oboe_desc">Google\'s audio library that automatically picks AAudio on modern devices and falls back to OpenSL ES on older ones.</string>
     <string name="prefer_media_store_art">Prefer MediaStore Album Arts</string>
     <string name="prefer_media_store_art_summary">Use album arts from MediaStore when available instead of scanning album arts from audio files. This may cause a delay in showing album arts for newly added songs until the MediaStore is updated.</string>
-    <string name="aaudio_warning">AAudio is highly experimental at the moment and there is no guarantee it will work on all devices and perform as expected.</string>
     <string name="album_art_light">Album Art (Light)</string>
     <string name="album_art_dark">Album Art (Dark)</string>
     <string name="visualizer_latency">Visualizer Latency</string>
@@ -355,7 +350,6 @@
     <string name="playlist_description">Description (optional)</string>
     <string name="edit_playlist">Edit Playlist</string>
     <string name="add_all_to_queue">Add All to Queue</string>
-    <string name="manual">Manual</string>
     <string name="as_added">As Added</string>
     <string name="filter_categories">Filter Categories</string>
     <string name="about">About</string>
@@ -363,7 +357,6 @@
     <string name="version">Version</string>
     <string name="socials">Socials</string>
     <string name="telegram_channel_summary">Join app\'s Telegram Channel for all app related updates.</string>
-    <string name="gumroad">Gumroad</string>
     <string name="enter_license_key">Enter License Key</string>
     <string name="enter_license_key_summary">Enter license key purchased from Gumroad here.</string>
     <string name="purchase">Purchase</string>
@@ -411,7 +404,8 @@
     <string name="save_preset">Save Preset</string>
     <string name="preset_name_hint">Preset name…</string>
     <string name="built_in">Built-in</string>
-    <string name="custom">Custom</string>
+    <string name="switch_to_peq">Switch to PEQ</string>
+    <string name="switch_to_graphic_eq">Switch to Graphic EQ</string>
 
     <!-- LRC Editor -->
     <string name="lrc_lyric_hint">Lyric line…</string>
@@ -422,15 +416,10 @@
     <string name="rewind">Rewind</string>
     <string name="forward">Forward</string>
     <string name="add_lyrics">Add Lyrics</string>
-    <string name="no_folders_added">No folders added yet. Tap the + button to add one.</string>
-    <string name="path_added">Path added successfully.</string>
-    <string name="path_removed">Path removed.</string>
-    <string name="storage_root">Storage Root</string>
     <string name="dividers">Dividers</string>
     <string name="dividers_summary">Add divider lines in the lists.</string>
     <string name="like_icon">Like Icon</string>
     <string name="like_icon_summary">Replace the heart icon for favorites with a thumbs up icon in the app.</string>
-    <string name="buy_full_version">Buy Full Version</string>
     <string name="trial_period">Trial Period</string>
     <string name="cache">Cache</string>
     <string name="clear_image_cache">Clear Image Cache</string>
@@ -457,22 +446,7 @@
     <string name="reshuffle">No Reshuffle</string>
     <string name="reshuffle_summary">Do not shuffle the list again if the current list is already shuffled when a new song is selected.</string>
 
-
-    <string name="year_hint">YYYY</string>
-    <string name="track_number_hint">e.g. 1</string>
-    <string name="num_tracks_hint">e.g. 12</string>
-    <string name="disc_number_hint">1</string>
-    <string name="disc_total_hint">1</string>
-    <string name="of">of</string>
-    <string name="rg_db_hint">e.g. +1.23 dB</string>
-    <string name="rg_peak_hint">e.g. 0.9876</string>
-    <string name="rg_track_peak">Track Peak</string>
-    <string name="rg_album_peak">Album Peak</string>
-
     <string name="label">Label</string>
-    <string name="portrait">Portrait</string>
-    <string name="span_type">Span Type</string>
-    <string name="landscape">Landscape</string>
     <string name="relaxed">Relaxed</string>
     <string name="compact">Compact</string>
     <string name="single">Single</string>
@@ -489,14 +463,12 @@
     <string name="about_album">About the Album</string>
     <string name="search_metadata">Search</string>
     <string name="synced">Synced</string>
-    <string name="metadata_synced_lyrics_saved">Synced lyrics saved</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="active_since">Active since %1$s</string>
-    <string name="active_years">%1$s – %2$s</string>
+
     <string name="active_since_present">%1$s – present</string>
     <string name="released_in">Released %1$s</string>
-    <string name="label_on">On %1$s</string>
     <string name="pause_activity">Pause Activity</string>
     <string name="pause_activity_summary">Prevent app from keeping the playback activity records.</string>
     <string name="clear_playback_stats">Clear Playback Stats</string>
@@ -508,5 +480,13 @@
     <string name="no_bookmarks">No bookmarks yet</string>
     <string name="bookmark_too_close">A bookmark already exists nearby</string>
     <string name="bookmark_at">Bookmark at %1$s</string>
-    <string name="clear_bookmarks">Clear All Bookmarks</string>
+    <string name="play_store_foss_purchase_info">The FOSS version of this app does not support Google Play purchases. To make a purchase, please install the version available on the Google Play Store.</string>
+    <string name="playstore_link">Play Store Link</string>
+    <string name="playstore_link_summary">Open the app\'s Play Store page.</string>
+    <string name="disable_equalizer">Disable Equalizer</string>
+    <string name="enable_equalizer">Enable Equalizer</string>
+    <string name="show_lyrics_summary">Show single line lyrics on player screen.</string>
+    <string name="carousel">Carousel</string>
+    <string name="carousel_ui_desc">Simple player style with carousel type album arts.</string>
+    <string name="caps">Caps</string>
 </resources>
