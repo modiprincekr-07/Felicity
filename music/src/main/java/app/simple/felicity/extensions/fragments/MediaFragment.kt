@@ -195,6 +195,7 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
             MediaPlaybackManager.songListFlow.collect { songs ->
                 Log.d(TAG, "Song list updated: ${songs.size} songs")
                 onSongListChanged(songs)
+                saveCurrentPlaybackState()
             }
         }
 
@@ -313,11 +314,18 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
                     index = idx,
                     position = seek,
                     shuffle = shuffleEnabled,
-                    repeat = 0
+                    repeat = 0,
+                    activeQueueId = MediaPlaybackManager.getActiveQueueId()
             )
         }
     }
 
+    /**
+     * Gets called on two occasions:
+     * 1) When the song position changes.
+     * 2) When the seek position changes and the new position passes a certain
+     * threshold (e.g. every 5 seconds or every 5% of the song duration, whichever is larger).
+     */
     private fun saveCurrentPlaybackState() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             PlaybackStateManager.saveCurrentPlaybackState(requireContext(), TAG)
@@ -728,7 +736,7 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
                 val title = audio.getProperTitle()
                 val fullText = getString(R.string.delete_audio_summary, title)
 
-                val startIndex = fullText.indexOf(title ?: "")
+                val startIndex = fullText.indexOf(title)
                 val spannable = SpannableString(fullText)
 
                 if (startIndex >= 0) {

@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import app.simple.felicity.databinding.DialogVolumeKnobBinding
 import app.simple.felicity.decorations.knobs.FelicityKnobListener
 import app.simple.felicity.dialogs.app.VolumeKnob.Companion.VOLUME_REPEAT_DELAY_MS
+import app.simple.felicity.engine.usb.UsbDacDriver
 import app.simple.felicity.extensions.dialogs.ScopedBottomSheetFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,6 +98,7 @@ class VolumeKnob : ScopedBottomSheetFragment() {
                 .distinctUntilChanged()
                 .collect { index ->
                     audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0)
+                    syncDacVolume()
                 }
         }
 
@@ -115,6 +117,7 @@ class VolumeKnob : ScopedBottomSheetFragment() {
             }
 
             override fun onUserInteractionStart(value: Float) {
+                stopCloseRunnable()
                 requireContext().contentResolver.unregisterContentObserver(volumeObserver)
             }
 
@@ -123,6 +126,8 @@ class VolumeKnob : ScopedBottomSheetFragment() {
                     requireContext().contentResolver.registerContentObserver(
                             Settings.System.CONTENT_URI, true, volumeObserver)
                 }
+
+                startCloseRunnable()
             }
         })
 
@@ -219,7 +224,7 @@ class VolumeKnob : ScopedBottomSheetFragment() {
 
     private fun startCloseRunnable() {
         stopCloseRunnable()
-        closeRunnable = Runnable { dismiss() }
+        closeRunnable = Runnable { dismissAllowingStateLoss() }
         closeHandler.postDelayed(closeRunnable!!, VOLUME_CLOSE_DELAY_MS)
     }
 
@@ -239,6 +244,7 @@ class VolumeKnob : ScopedBottomSheetFragment() {
             val maxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat() ?: 1f
             val newVolume = (currentVolume + 0.05f * maxVolume).coerceAtMost(maxVolume)
             audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume.roundToInt(), 0)
+            syncDacVolume()
             setVolumeKnobPosition()
         }
     }
@@ -249,8 +255,19 @@ class VolumeKnob : ScopedBottomSheetFragment() {
             val maxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?.toFloat() ?: 1f
             val newVolume = (currentVolume - 0.05f * maxVolume).coerceAtLeast(0f)
             audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume.roundToInt(), 0)
+            syncDacVolume()
             setVolumeKnobPosition()
         }
+    }
+
+    /**
+     * Pushes the current system volume to the USB DAC's hardware Feature Unit so
+     * the DAC output level stays paired with the Android media volume. Safe to call
+     * even when no DAC is connected — [UsbDacDriver.setHardwareVolume] no-ops.
+     */
+    private fun syncDacVolume() {
+        val context = context ?: return
+        UsbDacDriver.getInstance(context).syncSystemVolumeToDac()
     }
 
     override fun onStart() {

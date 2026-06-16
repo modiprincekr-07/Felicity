@@ -1,6 +1,25 @@
 cmake_minimum_required(VERSION 3.22.1)
 project("felicity_gpu_blur" LANGUAGES CXX)
 
+# ---------------------------------------------------------------------------
+# REPRODUCIBILITY BLOCK
+# ---------------------------------------------------------------------------
+
+# Strip paths for both YOUR source AND FetchContent's downloaded source
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=./build")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=./build")
+
+# Strip Android NDK paths
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffile-prefix-map=${ANDROID_NDK}=./ndk")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${ANDROID_NDK}=./ndk")
+
+# Force deterministic static archives (.a files) for TagLib
+# The 'D' flag tells ar to use zero for UIDs, GIDs, and timestamps.
+set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcDT <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcDT <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> qDT <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_APPEND "<CMAKE_AR> qDT <TARGET> <LINK_FLAGS> <OBJECTS>")
+
 add_library(felicity_gpu_blur SHARED
         gaussian_blur.cpp
         blur_jni.cpp

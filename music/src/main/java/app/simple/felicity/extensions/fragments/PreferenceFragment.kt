@@ -48,6 +48,18 @@ import java.util.function.Supplier
 @Suppress("unused")
 abstract class PreferenceFragment : MediaFragment() {
 
+    /**
+     * Bookmarks:
+     * Appearance Preferences: [createAppearancePanel]
+     * User Interface Preferences: [createUserInterfacePanel]
+     * Configuration Preferences: [createConfigurationPreferences]
+     * Behavior Preferences: [createBehaviorPanel]
+     * Engine Preferences: [createEnginePanel]
+     * Library Preferences: [createLibraryPanel]
+     * Accessibility Preferences: [createAccessibilityPanel]
+     * About Preferences: [createAboutPanel]
+     */
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireHiddenMiniPlayer()
@@ -383,16 +395,16 @@ abstract class PreferenceFragment : MediaFragment() {
                 }
         )
 
-        val immersiveMode = Preference(
-                title = R.string.immersive_mode,
-                summary = R.string.immersive_mode_summary,
-                icon = R.drawable.ic_fullscreen,
+        val volumeControls = Preference(
+                title = R.string.volume_controls,
+                summary = R.string.volume_controls_summary,
+                icon = R.drawable.ic_volume_up,
                 type = PreferenceType.SWITCH,
                 onPreferenceAction = { view, callback ->
-                    UserInterfacePreferences.setImmersiveMode((view as FelicitySwitch).isChecked)
+                    UserInterfacePreferences.setVolumeControls((view as FelicitySwitch).isChecked)
                 },
                 valueProvider = Supplier {
-                    UserInterfacePreferences.isImmersiveMode()
+                    UserInterfacePreferences.isVolumeControls()
                 }
         )
 
@@ -405,8 +417,8 @@ abstract class PreferenceFragment : MediaFragment() {
         preferences.add(miniPlayerHeader)
         preferences.add(marginAroundMiniplayerToggle)
         preferences.add(applicationHeader)
-        preferences.add(immersiveMode)
         preferences.add(likeButton)
+        preferences.add(volumeControls)
 
         return preferences
     }
@@ -716,7 +728,18 @@ abstract class PreferenceFragment : MediaFragment() {
                 }
         )
 
-        val playbackHeader = Preference(type = PreferenceType.SUB_HEADER, title = R.string.playback)
+        val usbDacControl = Preference(
+                title = R.string.usb_dac,
+                summary = R.string.usb_dac_control_summary,
+                icon = R.drawable.ic_usb,
+                type = PreferenceType.SWITCH,
+                onPreferenceAction = { view, callback ->
+                    AudioPreferences.setUsbDac((view as FelicitySwitch).isChecked)
+                },
+                valueProvider = Supplier {
+                    AudioPreferences.isUsbDacEnabled()
+                }
+        )
 
         val hiresToggle = Preference(
                 title = R.string.high_resolution_output,
@@ -730,6 +753,8 @@ abstract class PreferenceFragment : MediaFragment() {
                     AudioPreferences.isHiresOutputEnabled()
                 }
         )
+
+        val playbackHeader = Preference(type = PreferenceType.SUB_HEADER, title = R.string.playback)
 
         val stereoDownmixing = Preference(
                 title = R.string.force_stereo_downmixing,
@@ -838,6 +863,7 @@ abstract class PreferenceFragment : MediaFragment() {
         preferences.add(fallbackToSWToggle)
         preferences.add(outputHeader)
         preferences.add(sinkPopup)
+        preferences.add(usbDacControl)
         preferences.add(hiresToggle)
         preferences.add(playbackHeader)
         preferences.add(stereoDownmixing)
