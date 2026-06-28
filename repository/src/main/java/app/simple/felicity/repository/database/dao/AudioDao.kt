@@ -93,6 +93,98 @@ interface AudioDao {
     @Query("SELECT * FROM audio WHERE artist = :artist AND is_available = 1 ORDER BY title COLLATE NOCASE ASC")
     fun getAudioByArtist(artist: String): Flow<MutableList<Audio>>
 
+    // Fetch only the tracks for the specific album
+    @Query("""
+        SELECT * FROM audio 
+        WHERE album = :albumName 
+        AND duration >= :minDuration 
+        AND size >= :minSize
+    """)
+    fun getTracksForAlbum(albumName: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    // Get global track and unique album counts for specific artists
+    @Query("""
+        SELECT COUNT(id) FROM audio WHERE album_artist LIKE :artistName
+    """)
+    fun getTrackCountForArtist(artistName: String): Int
+
+    @Query("""
+        SELECT COUNT(DISTINCT album) FROM audio WHERE album_artist LIKE :artistName
+    """)
+    fun getAlbumCountForArtist(artistName: String): Int
+
+    // Get all track paths for an artist (for the Artist object map)
+    @Query("""
+        SELECT uri FROM audio WHERE album_artist LIKE :artistName
+    """)
+    fun getTrackPathsForArtist(artistName: String): List<String>
+
+    // Get global track paths for a specific genre
+    @Query("""
+        SELECT uri FROM audio WHERE genre = :genreName
+    """)
+    fun getTrackPathsForGenre(genreName: String): List<String>
+
+    // Fetches only tracks that contain the artist name somewhere in the field.
+    // This allows the DB to instantly discard 99% of the library before Kotlin touches it.
+    @Query("""
+    SELECT * FROM audio 
+    WHERE artist LIKE '%' || :artistName || '%' 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getCandidateTracksForArtist(artistName: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    @Query("""
+    SELECT * FROM audio 
+    WHERE album_artist LIKE '%' || :artistName || '%' 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getCandidateTracksForAlbumArtist(artistName: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    @Query("""
+    SELECT * FROM audio 
+    WHERE composer LIKE :composerName 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getTracksForComposer(composerName: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    @Query("""
+    SELECT * FROM audio 
+    WHERE uri LIKE '%' || :folderPath || '%' 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getCandidateTracksForFolder(folderPath: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    @Query("""
+    SELECT * FROM audio 
+    WHERE genre = :genreName 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getTracksForGenre(genreName: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    // Query for a specific year
+    @Query("""
+    SELECT * FROM audio 
+    WHERE year = :year 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getTracksForYear(year: String, minDuration: Long, minSize: Long): Flow<List<Audio>>
+
+    // 2. Query for tracks with missing year data
+    @Query("""
+    SELECT * FROM audio 
+    WHERE (year IS NULL OR year = '') 
+    AND duration >= :minDuration 
+    AND size >= :minSize
+    """)
+    fun getTracksForUnknownYear(minDuration: Long, minSize: Long): Flow<List<Audio>>
+
     // get all audio files by artist name with filtering
     @Query("SELECT * FROM audio WHERE artist = :artist AND is_available = 1 AND duration >= :minDuration AND size >= :minSize ORDER BY title COLLATE NOCASE ASC")
     fun getFilteredAudioByArtist(artist: String, minDuration: Long, minSize: Long): Flow<MutableList<Audio>>

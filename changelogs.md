@@ -1,15 +1,18 @@
+#### User Interface
+
+- Added current queue indicator in **Dashboard** header.
+
 #### Bug Fixes
 
-- Fixed playback state reshuffling on launch when shuffle is on. #106
+- Fixed queue reshuffling when app state is restored. #106
+- Fixed various layout issues where the elements overlap with status and navigation bars. #109
+- Fixed notifications not showing song title in broken audio metadata. #84
+- Fixed broken **Total Time** dialog. #128
+- Fixed page panels taking too long to load.
+    - Current loading is optimized to load data over 8 times faster now.
 
-#### Improvements
+#### Removed
 
-- Open IMEs automatically when **Preferences Search** panel is opened. #76
-
-#### Translations
-
-- Added **Polish** translations. (by [@awchx](https://crowdin.com/profile/awchx))
-
-#### Development
-
-- Fixed broken reproducibility causing F-Droid build failure.
+- Removed USB DAC toggle.
+    - DAC driver implementation has been postponed for later stages of development. DAC output will
+      continue to work through other audio sinks.

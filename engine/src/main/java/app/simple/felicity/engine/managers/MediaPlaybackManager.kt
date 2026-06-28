@@ -32,6 +32,7 @@ import app.simple.felicity.repository.constants.MediaConstants
 import app.simple.felicity.repository.listeners.MediaStateListener
 import app.simple.felicity.repository.models.Audio
 import app.simple.felicity.repository.shuffle.Shuffle.smartShuffle
+import app.simple.felicity.repository.utils.AudioUtils.getProperAlbum
 import app.simple.felicity.repository.utils.AudioUtils.getProperArtists
 import app.simple.felicity.repository.utils.AudioUtils.getProperTitle
 import app.simple.felicity.shared.utils.ProcessUtils.ensureOnMainThread
@@ -68,19 +69,23 @@ private fun String.toPlaybackUri(): Uri {
 }
 
 /**
- * Builds a lean [MediaItem] for this audio track — only the media ID and URI are included.
+ * Builds a [MediaItem] for this audio track with essential metadata for the system notification.
  *
- * Embedding title and artist in every item's metadata causes the entire playlist to be
- * bundled and sent across process boundaries (Binder IPC) each time the queue is handed
- * to the media controller. With a large library this bundle can exhaust the heap during
- * deserialization on the service side, resulting in an OutOfMemoryError. Keeping items
- * metadata-free eliminates that overhead entirely; the service reads song info directly
- * from [MediaPlaybackManager.getCurrentSong] whenever it needs it.
+ * The title, artist, and album title are included so that the Media3 notification displays
+ * meaningful information instead of falling back to the generic "App is running" placeholder.
+ * Null or blank fields are automatically replaced with "Unknown" by the utility functions.
  */
 private fun Audio.toMediaItem(): MediaItem {
     return MediaItem.Builder()
         .setMediaId(id.toString())
         .setUri(uri.toPlaybackUri())
+        .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(getProperTitle())
+                    .setArtist(getProperArtists())
+                    .setAlbumTitle(getProperAlbum())
+                    .build()
+        )
         .build()
 }
 
@@ -254,7 +259,7 @@ object MediaPlaybackManager {
      * Note: Emission order between list and position is not strictly guaranteed due to coroutines,
      * but replay=1 on both flows ensures UI will observe the latest of each.
      */
-    fun setSongs(audios: List<Audio>, position: Int = 0, startPositionMs: Long = 0L, autoPlay: Boolean = false) {
+    fun setSongs(audios: List<Audio>, position: Int = 0, startPositionMs: Long = 0L, autoPlay: Boolean = false, isRestore: Boolean = false) {
         Log.d(
                 TAG,
                 "setSongs called: count=${audios.size}, position=$position, startPositionMs=$startPositionMs, autoPlay=$autoPlay"
@@ -326,7 +331,7 @@ object MediaPlaybackManager {
                 val activeQueue: List<Audio>
                 val newShuffledQueue: List<Audio>
 
-                if (shuffleOn) {
+                if (shuffleOn && isRestore.not()) {
                     // Smart shuffle keeps artists spread out and anchors the tapped song first.
                     val startSong = audios.getOrNull(position)
                     val shuffled = smartShuffle(audios, { it.artist ?: "" }, startSong)
@@ -1119,8 +1124,9 @@ object MediaPlaybackManager {
                     .setUri(uri)
                     .setMediaMetadata(
                             MediaMetadata.Builder()
-                                .setArtist(audio.artist)
                                 .setTitle(audio.getProperTitle())
+                                .setArtist(audio.getProperArtists())
+                                .setAlbumTitle(audio.getProperAlbum())
                                 .build()
                     )
                     .build()
@@ -1176,8 +1182,9 @@ object MediaPlaybackManager {
                     .setUri(uri)
                     .setMediaMetadata(
                             MediaMetadata.Builder()
-                                .setArtist(audio.getProperArtists())
                                 .setTitle(audio.getProperTitle())
+                                .setArtist(audio.getProperArtists())
+                                .setAlbumTitle(audio.getProperAlbum())
                                 .build()
                     )
                     .build()
@@ -1240,8 +1247,9 @@ object MediaPlaybackManager {
                     .setUri(uri)
                     .setMediaMetadata(
                             MediaMetadata.Builder()
-                                .setArtist(audio.getProperArtists())
                                 .setTitle(audio.getProperTitle())
+                                .setArtist(audio.getProperArtists())
+                                .setAlbumTitle(audio.getProperAlbum())
                                 .build()
                     )
                     .build()
