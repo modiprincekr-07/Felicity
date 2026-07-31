@@ -1,18 +1,15 @@
 #### User Interface
 
-- Added current queue indicator in **Dashboard** header.
+- Added toggle to stack **Waveform** and **Media Controls** in **Now Playing** screen.
 
-#### Bug Fixes
+#### Playback
 
-- Fixed queue reshuffling when app state is restored. #106
-- Fixed various layout issues where the elements overlap with status and navigation bars. #109
-- Fixed notifications not showing song title in broken audio metadata. #84
-- Fixed broken **Total Time** dialog. #128
-- Fixed page panels taking too long to load.
-    - Current loading is optimized to load data over 8 times faster now.
+- Added a route based audio sink to create exclusive audio playback pipeline. #137
+    - Also, possibly fix the rainy audio issues in some devices due to exclusive audio output fixing
+      many audio underrun issues.
+    - Eliminates the need for double clock sync architecture reducing half the CPU load and saves
+      battery.
 
-#### Removed
+#### Translations
 
-- Removed USB DAC toggle.
-    - DAC driver implementation has been postponed for later stages of development. DAC output will
-      continue to work through other audio sinks.
+- Added **Spanish** translations.

@@ -16,6 +16,7 @@ import app.simple.felicity.decorations.seekbars.WaveformSeekbar
 import app.simple.felicity.decorations.views.FavoriteButton
 import app.simple.felicity.decorations.views.FelicityMediaControls
 import app.simple.felicity.decorations.views.FelicityVisualizer
+import app.simple.felicity.decorations.views.FlexStackLayout
 import app.simple.felicity.extensions.fragments.BasePlayerFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -87,6 +88,9 @@ class CarouselPlayer : BasePlayerFragment() {
 
     override val lrc: LrcLineView
         get() = binding.lrc
+
+    override val seekbarContainer: FlexStackLayout
+        get() = binding.seekbarContainer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentPlayerCarouselBinding.inflate(inflater, container, false)
