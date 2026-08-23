@@ -9,7 +9,7 @@
     </attr>
 
     <declare-styleable name="DynamicCornerLayout">
-        <!-- At least one of them needs to be true else roundness will be applies to all corners
+        <!-- At least one of them needs to be true else roundness will be applied to all corners
                 default is false for both of them -->
         <attr name="roundTopCorners" format="boolean" />
         <attr name="roundBottomCorners" format="boolean" />
@@ -213,7 +213,7 @@
         <attr name="springStiffness" format="float" />
         <!-- Spring damping ratio. <1 = bouncy. Default: 0.62. -->
         <attr name="springDamping" format="float" />
-        <!-- Whether to show the bottom dot indicator. Default: true. -->
+        <!-- Whether to show the dot indicator. Default: true. -->
         <attr name="showIndicator" format="boolean" />
         <!-- Whether to apply a directional edge fade-out effect. Default: false. -->
         <attr name="fadeEnabled" format="boolean" />
@@ -237,6 +237,43 @@
             <enum name="left_to_right" value="2" />
             <enum name="right_to_left" value="3" />
         </attr>
+        <!--
+            Which axis pages scroll along.
+            horizontal (0) – pages slide left and right (default).
+            vertical   (1) – pages slide up and down; the dot indicator moves to the right
+                             edge and rotates 90 degrees to stay parallel to the scroll axis.
+        -->
+        <attr name="slideDirection" />
+        <!--
+            Pager display mode.
+            normal   (0) – each page fills the full pager size (default).
+            carousel (1) – a square card is centered with neighbor pages peeking in from both sides.
+        -->
+        <attr name="pagerMode" />
+        <!--
+            How many pixels of the neighboring card peek in from each side in carousel mode.
+            When absent the pager defaults to 48 dp. Only used when carouselCardSize is 0.
+        -->
+        <attr name="carouselPeekMargin" />
+        <!--
+            Fixed pixel size of the square carousel card. When absent (or 0) the card size is
+            auto-computed. Only used in carousel mode.
+        -->
+        <attr name="carouselCardSize" />
+        <!--
+            Pixel gap between adjacent cards in carousel mode. Defaults to 16 dp.
+        -->
+        <attr name="carouselPageSpacing" />
+        <!--
+            Whether the neighbor cards are visible in carousel mode.
+            true = neighbors peek in (default); false = only the center card is shown.
+        -->
+        <attr name="carouselShowSidePages" />
+        <!--
+            How many dp to shrink side cards relative to the center card in carousel mode.
+            0 (default) disables the built-in scaling. Good starting values: 24 dp–64 dp.
+        -->
+        <attr name="carouselSideScaleDp" />
     </declare-styleable>
 
     <!--
@@ -325,6 +362,7 @@
                                         full       (1) – bars grow symmetrically above and below center.
                                         reflection (2) – half spectrum at top with an alpha-blended
                                                          inverted mirror below, separated by a thin line.
+        wsbLayoutMode                 – scrolling (0, default) or full-track (1) layout; see attr docs below.
         wsbBarWidth                   – pixel width of each amplitude bar. Default: 6dp.
         wsbBarSpacing                 – pixel gap between adjacent bars. Default: 3dp.
         wsbFadeEdgeLength             – horizontal DST_OUT fading edge on each side. Default: 72dp.
@@ -333,6 +371,8 @@
         wsbReflectionTopGap           – gap between main waveform bottom and separator line. Default: 0dp.
         wsbReflectionBottomGap        – gap between separator line and reflection top. Default: 3dp.
         wsbReflectionAlpha            – uniform alpha [0,1] for reflected bars. Default: 0.4.
+        wsbOptics                     – fish-eye lens strength [0,1] bending the waveform
+                                        around the playhead. Default: 0.0 (flat).
     -->
     <declare-styleable name="WaveformSeekbar">
         <!--
@@ -346,6 +386,18 @@
             <enum name="half" value="0" />
             <enum name="full" value="1" />
             <enum name="reflection" value="2" />
+        </attr>
+        <!--
+            Layout mode controlling whether the waveform scrolls or shows the whole track at once.
+            scrolling (0) – the classic behavior: the playhead stays pinned to the center while
+                            the waveform scrolls beneath it (default).
+            full      (1) – the entire track is squeezed into the available width and does not
+                            scroll; the playhead moves across the bars like a normal seekbar.
+            Switching between the two smoothly zooms in/out, pivoting on the current playhead.
+        -->
+        <attr name="wsbLayoutMode" format="enum">
+            <enum name="scrolling" value="0" />
+            <enum name="full" value="1" />
         </attr>
         <attr name="wsbBarWidth" format="dimension" />
         <attr name="wsbBarSpacing" format="dimension" />
@@ -378,6 +430,12 @@
             Lower values produce a subtler mirror image. Default: 0.4.
         -->
         <attr name="wsbReflectionAlpha" format="float" />
+        <!--
+            Fish-eye lens strength [0.0, 1.0] that bends the waveform around the center
+            playhead so the left and right edges appear to curve away like a cylinder.
+            0.0 is perfectly flat (default); 1.0 gives the strongest rounded, circular look.
+        -->
+        <attr name="wsbOptics" format="float" />
     </declare-styleable>
 
     <!--

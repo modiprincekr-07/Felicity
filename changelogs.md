@@ -1,15 +1,28 @@
 #### User Interface
 
-- Added toggle to stack **Waveform** and **Media Controls** in **Now Playing** screen.
+- Added **Shuffle** button in the **Playing Queue** panel.
+- Added optical adjustment option for waveform in **Player Screens**.
+- Added **Clear Button** in **Search** panel.
+- Added toggle to show songs first or after the **Albums**, **Artists** and **Genres** in *
+  *Pages/Details** panel.
 
-#### Playback
+#### Bug Fixes
 
-- Added a route based audio sink to create exclusive audio playback pipeline. #137
-    - Also, possibly fix the rainy audio issues in some devices due to exclusive audio output fixing
-      many audio underrun issues.
-    - Eliminates the need for double clock sync architecture reducing half the CPU load and saves
-      battery.
+- Fixed curtain animations in lyrics starting from the beginning in plain lyrics mode causing the
+  lyrics taking too long to fully appear on the screen.
+- Fixed critical latency issues when using **AAudio** and **Oboe** audio sinks.
+- Fixed **Bookmarks** list not animating.
+- Fixed irregular fading edges in **Dashboard** strip.
 
-#### Translations
+#### Improvements
 
-- Added **Spanish** translations.
+- Tapping the widget should launch/open the app.
+- Hide fast scroll button when search results are empty.
+
+#### Changes
+
+- Changed **Skip .nomedia** and **Skip Hidden Files** to off by default.
+
+#### Removed
+
+- Removed toggle to disable visualizer bars in **Player Screens**.

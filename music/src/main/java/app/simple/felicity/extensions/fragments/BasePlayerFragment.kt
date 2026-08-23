@@ -339,7 +339,11 @@ abstract class BasePlayerFragment : MediaFragment() {
 
         // When the user taps a bar (no drag) we show the bookmark context menu
         // anchored to the tapped position so they can add or remove a bookmark there.
-        seekbar.setOnBarTapListener { positionMs ->
+        //        seekbar.setOnBarTapListener { positionMs ->
+        //            openBookmarkMenu(positionMs)
+        //        }
+
+        seekbar.setOnBarLongTapListener { positionMs ->
             openBookmarkMenu(positionMs)
         }
 
@@ -437,7 +441,7 @@ abstract class BasePlayerFragment : MediaFragment() {
     }
 
     private fun setVisualizerCapsState() {
-        visualizer.setCapsEnabled(VisualizerPreferences.areCapsEnabled())
+        visualizer.capsEnabled = VisualizerPreferences.areCapsEnabled()
     }
 
     private fun setLyricsState() {
@@ -496,6 +500,13 @@ abstract class BasePlayerFragment : MediaFragment() {
         seekbar.setProgress(MediaPlaybackManager.getSeekPosition(), animate = false)
         updatePlayButtonState(MediaPlaybackManager.isPlaying())
         updateFavoriteIcon(audio)
+        seekbar.optics = UserInterfacePreferences.getWaveformOptics()
+
+        seekbar.layoutMode = if (UserInterfacePreferences.isWaveformFullMode()) {
+            WaveformSeekbar.LAYOUT_MODE_FULL
+        } else {
+            WaveformSeekbar.LAYOUT_MODE_SCROLLING
+        }
 
         // Defer waveform decoding until ExoPlayer is actually playing to avoid
         // Amplituda and ExoPlayer fighting over the same file I/O resources.
@@ -685,6 +696,16 @@ abstract class BasePlayerFragment : MediaFragment() {
             }
             UserInterfacePreferences.TIMER_POSITION -> {
                 updateMediaControlOverlap()
+            }
+            UserInterfacePreferences.WAVEFORM_OPTICS -> {
+                seekbar.optics = UserInterfacePreferences.getWaveformOptics()
+            }
+            UserInterfacePreferences.WAVEFORM_FULL_MODE -> {
+                seekbar.layoutMode = if (UserInterfacePreferences.isWaveformFullMode()) {
+                    WaveformSeekbar.LAYOUT_MODE_FULL
+                } else {
+                    WaveformSeekbar.LAYOUT_MODE_SCROLLING
+                }
             }
         }
     }

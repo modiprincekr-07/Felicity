@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import app.simple.felicity.R
 import app.simple.felicity.databinding.DialogWaveformMenuBinding
+import app.simple.felicity.decorations.seekbars.FelicitySeekbar
 import app.simple.felicity.decorations.toggles.FelicityButtonGroup.Companion.Button
 import app.simple.felicity.extensions.dialogs.MediaBottomDialogFragment
 import app.simple.felicity.preferences.UserInterfacePreferences
@@ -26,7 +27,9 @@ class WaveformMenu : MediaBottomDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.stackMediaControlsSwitch.isChecked = UserInterfacePreferences.isStackMediaControls()
+        binding.opticsSeekbar.setProgress(UserInterfacePreferences.getWaveformOptics() * WAVEFORM_COMPENSATION)
         setTimerPosition()
+        setWaveformMode()
 
         binding.stackMediaControlsSwitch.setOnCheckedChangeListener { _, isChecked ->
             UserInterfacePreferences.setStackMediaControls(isChecked)
@@ -36,6 +39,12 @@ class WaveformMenu : MediaBottomDialogFragment() {
                 }
             }
         }
+
+        binding.opticsSeekbar.setOnSeekChangeListener(object : FelicitySeekbar.OnSeekChangeListener {
+            override fun onProgressChanged(seekbar: FelicitySeekbar, progress: Float, fromUser: Boolean) {
+                UserInterfacePreferences.setWaveformOptics(progress / WAVEFORM_COMPENSATION)
+            }
+        })
     }
 
     private fun setTimerPosition() {
@@ -83,6 +92,26 @@ class WaveformMenu : MediaBottomDialogFragment() {
         }
     }
 
+    private fun setWaveformMode() {
+        binding.waveformModeButtonGroup.setButtons(
+                listOf(
+                        Button(iconResId = R.drawable.ic_close_fullscreen),
+                        Button(iconResId = R.drawable.ic_swipe)
+                )
+        )
+
+        binding.waveformModeButtonGroup.setSelectedIndex(
+                if (UserInterfacePreferences.isWaveformFullMode()) 0 else 1
+        )
+
+        binding.waveformModeButtonGroup.setOnButtonSelectedListener {
+            when (it) {
+                0 -> UserInterfacePreferences.setWaveformFullMode(true)
+                1 -> UserInterfacePreferences.setWaveformFullMode(false)
+            }
+        }
+    }
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         super.onSharedPreferenceChanged(sharedPreferences, key)
         when (key) {
@@ -103,6 +132,8 @@ class WaveformMenu : MediaBottomDialogFragment() {
             val dialog = newInstance()
             dialog.show(this, TAG)
         }
+
+        private const val WAVEFORM_COMPENSATION = 100F
 
         const val TAG = "WaveformMenu"
     }
