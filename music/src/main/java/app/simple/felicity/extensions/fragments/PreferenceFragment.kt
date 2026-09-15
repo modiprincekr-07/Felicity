@@ -1019,6 +1019,21 @@ abstract class PreferenceFragment : MediaFragment() {
                 }
         )
 
+        val queueManagementHeader = Preference(type = PreferenceType.SUB_HEADER, title = R.string.queue_management)
+
+        val confirmQueueReplacementToggle = Preference(
+                title = R.string.confirm_queue_replacement,
+                summary = R.string.confirm_queue_replacement_summary,
+                icon = R.drawable.ic_queue,
+                type = PreferenceType.SWITCH,
+                onPreferenceAction = { view, callback ->
+                    LibraryPreferences.setConfirmQueueReplacementEnabled((view as FelicitySwitch).isChecked)
+                },
+                valueProvider = Supplier {
+                    LibraryPreferences.isConfirmQueueReplacementEnabled()
+                }
+        )
+
         val metadataHeader = Preference(type = PreferenceType.SUB_HEADER, title = R.string.metadata)
 
         val albumArtistsInsteadOfArtists = Preference(
@@ -1168,6 +1183,8 @@ abstract class PreferenceFragment : MediaFragment() {
         preferences.add(activityHeader)
         preferences.add(pauseActivityToggle)
         preferences.add(clearPlaybackStats)
+        preferences.add(queueManagementHeader)
+        preferences.add(confirmQueueReplacementToggle)
         preferences.add(metadataHeader)
         preferences.add(albumArtistsInsteadOfArtists)
         preferences.add(musicBrainz)
@@ -1257,6 +1274,21 @@ abstract class PreferenceFragment : MediaFragment() {
                 }
         )
 
+        val animationsHeader = Preference(type = PreferenceType.SUB_HEADER, title = R.string.animations)
+
+        val reduceAnimations = Preference(
+                title = R.string.reduce_animations,
+                summary = R.string.reduce_animations_summary,
+                icon = R.drawable.ic_animation,
+                type = PreferenceType.SWITCH,
+                onPreferenceAction = { view, callback ->
+                    AccessibilityPreferences.setReduceAnimations((view as FelicitySwitch).isChecked)
+                },
+                valueProvider = Supplier {
+                    AccessibilityPreferences.isAnimationReduced()
+                }
+        )
+
         preferences.add(userInterfaceHeader)
         preferences.add(divider)
         preferences.add(highlightClickedElement)
@@ -1264,6 +1296,8 @@ abstract class PreferenceFragment : MediaFragment() {
         preferences.add(miniPlayerHeader)
         preferences.add(strokeAroundMiniplayer)
         preferences.add(darkerMiniplayerShadow)
+        preferences.add(animationsHeader)
+        preferences.add(reduceAnimations)
 
         return preferences
     }

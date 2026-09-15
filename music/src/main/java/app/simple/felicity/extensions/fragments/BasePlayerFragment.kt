@@ -277,11 +277,19 @@ abstract class BasePlayerFragment : MediaFragment() {
         })
 
         queue.setOnClickListener {
-            openFragment(PlayingQueue.newInstance(), PlayingQueue.TAG)
+            openFragment(PlayingQueue.newInstance(fromPlayer = true), PlayingQueue.TAG)
         }
 
         count.setOnClickListener {
             queue.callOnClick()
+        }
+
+        artist.setOnClickListener {
+            openArtistPage(MediaPlaybackManager.getCurrentSong() ?: return@setOnClickListener)
+        }
+
+        album.setOnClickListener {
+            openAlbumPage(MediaPlaybackManager.getCurrentSong() ?: return@setOnClickListener)
         }
 
         search.setOnClickListener {
@@ -534,6 +542,8 @@ abstract class BasePlayerFragment : MediaFragment() {
                 repeat.alpha = 0.4f
             }
         }
+
+        pager.infiniteScrollEnabled = repeatMode == MediaConstants.REPEAT_QUEUE
     }
 
     /**
