@@ -16,13 +16,14 @@ import app.simple.felicity.databinding.FragmentLyricsBinding
 import app.simple.felicity.decorations.lrc.view.FelicityLrcView
 import app.simple.felicity.decorations.seekbars.WaveformSeekbar
 import app.simple.felicity.decorations.utils.TextViewUtils.setTextWithEffect
+import app.simple.felicity.decorations.views.FelicityMediaControls.Companion.MediaControlListener
 import app.simple.felicity.dialogs.lyrics.AddLyrics
 import app.simple.felicity.dialogs.lyrics.AddLyrics.Companion.showAddLyrics
 import app.simple.felicity.dialogs.lyrics.LyricsMenu
 import app.simple.felicity.dialogs.lyrics.LyricsMenu.Companion.showLyricsMenu
 import app.simple.felicity.engine.managers.MediaPlaybackManager
 import app.simple.felicity.extensions.fragments.MediaFragment
-import app.simple.felicity.glide.util.AudioCoverUtils.loadArtCoverWithPayload
+import app.simple.felicity.glide.util.AudioCoverUtils.loadArtCover
 import app.simple.felicity.managers.LyricsLoadingStatus
 import app.simple.felicity.preferences.LyricsPreferences
 import app.simple.felicity.preferences.UserInterfacePreferences
@@ -30,6 +31,8 @@ import app.simple.felicity.repository.constants.MediaConstants
 import app.simple.felicity.repository.models.Audio
 import app.simple.felicity.repository.utils.AudioUtils.getProperArtists
 import app.simple.felicity.repository.utils.AudioUtils.getProperTitle
+import app.simple.felicity.shared.utils.ViewUtils.gone
+import app.simple.felicity.shared.utils.ViewUtils.visible
 import app.simple.felicity.ui.panels.Lyrics.Companion.TEXT_SIZE_DEBOUNCE_MS
 import app.simple.felicity.ui.subpanels.LrcEditor
 import app.simple.felicity.ui.subpanels.LyricsSearch
@@ -83,6 +86,7 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
         requireHiddenMiniPlayer()
         setAlignment()
         applyTextSize()
+        setAlbumArtBackground(animate = true)
         updateState()
 
         binding.lrc.setOnLrcClickListener { timeInMillis, _ ->
@@ -125,17 +129,27 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
             })
         }
 
-        binding.next.setOnClickListener {
-            MediaPlaybackManager.next()
-        }
+        binding.mediaControls.setMediaControlListener(object : MediaControlListener {
+            override fun onPreviousClick() {
+                MediaPlaybackManager.previous()
+            }
 
-        binding.previous.setOnClickListener {
-            MediaPlaybackManager.previous()
-        }
+            override fun onNextClick() {
+                MediaPlaybackManager.next()
+            }
 
-        binding.play.setOnClickListener {
-            MediaPlaybackManager.flipState()
-        }
+            override fun onPlayClick() {
+                MediaPlaybackManager.flipState()
+            }
+
+            override fun onForwardStep() {
+                MediaPlaybackManager.seekRelative(SEEK_PER_PULSE_MS)
+            }
+
+            override fun onRewindStep() {
+                MediaPlaybackManager.seekRelative(-SEEK_PER_PULSE_MS)
+            }
+        })
 
         binding.search.setOnClickListener {
             openFragment(LyricsSearch.newInstance(), LyricsSearch.TAG)
@@ -233,11 +247,7 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
     }
 
     private fun updatePlayButtonState(isPlaying: Boolean) {
-        if (isPlaying) {
-            binding.play.setPlaying()
-        } else {
-            binding.play.setPaused()
-        }
+        binding.mediaControls.setPlaying(isPlaying)
     }
 
     private fun updateState() {
@@ -245,7 +255,16 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
         currentAudioPath = audio.uri
         binding.title.text = audio.getProperTitle()
         binding.artists.text = audio.getProperArtists()
-        binding.cover.loadArtCoverWithPayload(audio)
+        binding.cover.loadArtCover(
+                audio,
+                blur = true,
+                shadow = false,
+                crop = true,
+                roundedCorners = false,
+                darken = true,
+                greyscale = false,
+                vignette = true
+        )
         binding.lrc.setDuration(audio.duration)
         binding.seekbar.setDuration(audio.duration)
         binding.seekbar.setProgress(MediaPlaybackManager.getSeekPosition(), animate = false)
@@ -286,6 +305,24 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
         }
     }
 
+    @Suppress("SameParameterValue")
+    private fun setAlbumArtBackground(animate: Boolean = false) {
+        val enabled = LyricsPreferences.isAlbumArtBackground()
+        if (enabled) {
+            binding.cover.animate()
+                .alpha(1f)
+                .setDuration(if (animate) 300L else 0L)
+                .withStartAction { binding.cover.visible(false) }
+                .start()
+        } else {
+            binding.cover.animate()
+                .alpha(0f)
+                .setDuration(if (animate) 300L else 0L)
+                .withEndAction { binding.cover.gone(false) }
+                .start()
+        }
+    }
+
     override val wantsMiniPlayerVisible: Boolean
         get() = false
 
@@ -294,6 +331,7 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
         when (key) {
             LyricsPreferences.LRC_ALIGNMENT -> setAlignment(animate = true)
             LyricsPreferences.LRC_TEXT_SIZE -> scheduleTextSizeUpdate()
+            LyricsPreferences.ALBUM_ART_BACKGROUND -> setAlbumArtBackground(animate = true)
         }
     }
 
@@ -328,7 +366,16 @@ class Lyrics : MediaFragment(), AddLyrics.Companion.OnLyricsCreatedListener {
             val forward = MediaPlaybackManager.lastNavigationDirection
             binding.title.setTextWithEffect(audio.getProperTitle(), forward)
             binding.artists.setTextWithEffect(audio.getProperArtists(), forward, 50L)
-            binding.cover.loadArtCoverWithPayload(audio)
+            binding.cover.loadArtCover(
+                    audio,
+                    blur = true,
+                    shadow = false,
+                    crop = true,
+                    roundedCorners = false,
+                    darken = true,
+                    greyscale = false,
+                    vignette = true
+            )
             binding.lrc.setDuration(audio.duration)
             binding.seekbar.setDurationWithReset(audio.duration)
         }

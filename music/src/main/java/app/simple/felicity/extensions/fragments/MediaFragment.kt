@@ -65,6 +65,8 @@ import app.simple.felicity.repository.models.AudioBookmark
 import app.simple.felicity.repository.models.PlaylistWithSongs
 import app.simple.felicity.repository.repositories.LrcRepository
 import app.simple.felicity.repository.shuffle.Shuffle.smartShuffle
+import app.simple.felicity.repository.sort.PageSort.sortedForAlbumPage
+import app.simple.felicity.repository.sort.PageSort.sortedForArtistPage
 import app.simple.felicity.repository.utils.AudioUtils.getProperAlbum
 import app.simple.felicity.repository.utils.AudioUtils.getProperArtists
 import app.simple.felicity.repository.utils.AudioUtils.getProperTitle
@@ -86,8 +88,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
-open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
+open class MediaFragment : KeyboardScopedFragment(), MiniPlayerPolicy {
 
     private var shouldShowMiniPlayer = true
     private var lastSavedSeekPosition = 0L
@@ -454,7 +457,7 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
         // show mini player briefly then hide it again
         showMiniPlayer()
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(2000) // Show for 2 seconds
+            delay(2000.milliseconds) // Show for 2 seconds
 
             if (wantsMiniPlayerVisible.not()) {
                 hideMiniPlayer()
@@ -1160,7 +1163,7 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
 
             binding.addAllToQueue.setOnClickListener {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val songs = fetchAudiosByPaths(album.songPaths)
+                    val songs = fetchAudiosByPaths(album.songPaths).sortedForAlbumPage()
                     songs.forEach { MediaPlaybackManager.addToQueue(it) }
                 }
                 dismiss()
@@ -1256,7 +1259,7 @@ open class MediaFragment : ScopedFragment(), MiniPlayerPolicy {
 
             binding.addAllToQueue.setOnClickListener {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val songs = fetchAudiosByPaths(artist.songPaths)
+                    val songs = fetchAudiosByPaths(artist.songPaths).sortedForArtistPage()
                     songs.forEach { MediaPlaybackManager.addToQueue(it) }
                 }
                 dismiss()
