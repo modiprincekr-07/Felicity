@@ -70,6 +70,7 @@
     <string name="date_added">Data dodania</string>
     <string name="duration">Czas trwania</string>
     <string name="year">Rok</string>
+    <string name="years">Lata</string>
     <string name="sorting_style">Styl sortowania</string>
     <string name="normal">Normalny</string>
     <string name="reversed">Odwrócony</string>
@@ -235,6 +236,14 @@
     <string name="move_to_empty_queue">Przenieś do pustej kolejki</string>
     <string name="moved_to_empty_queue">Przeniesiono do kolejki %1$d</string>
     <string name="no_empty_queue_available">Brak wolnego miejsca w kolejce. Zamiast tego zastąpiono bieżącą kolejkę.</string>
+    <!-- Folder hierarchy shuffle scope confirmation -->
+    <string name="shuffle_scope_title">Losować utwory?</string>
+    <string name="shuffle_scope_message">Losować tylko utwory bezpośrednio wewnątrz tego folderu, czy uwzględnić każdy utwór również w jego podfolderach?</string>
+    <string name="shuffle_this_folder_only">Tylko ten folder</string>
+    <string name="shuffle_include_subfolders">Uwzględnij podfoldery</string>
+    <string name="no_songs_to_shuffle">Nie znaleziono utworów do losowania.</string>
+    <string name="play_scope_title">Odtworzyć utwory?</string>
+    <string name="play_scope_message">Odtwarzać tylko utwory bezpośrednio wewnątrz tego folderu, czy dołączyć również każdy utwór znaleziony w jego podfolderach?</string>
     <string name="sync_adjust">Dostosuj synchronizację</string>
     <string name="accessibility">Ułatwienia dostępu</string>
     <string name="accessibility_desc">Dostosuj ułatwienia dostępu dla lepszego doświadczenia.</string>
@@ -295,7 +304,6 @@
     <string name="files">Pliki</string>
     <string name="style">Styl</string>
     <string name="latency">Opóźnienie</string>
-    <string name="particles">Cząstki</string>
     <string name="slide">Przesunięcie</string>
     <string name="typewriting">Maszyna do pisania</string>
     <string name="no_effect">Bez efektu</string>
@@ -424,6 +432,8 @@
     <string name="done">Gotowe</string>
     <string name="manage_music_folders">Zarządzaj folderami z muzyką</string>
     <string name="manage_music_folders_desc">Zarządzaj lokalnymi katalogami do indeksowania biblioteki.</string>
+    <string name="immersive_mode">Tryb immersyjny</string>
+    <string name="immersive_mode_summary">Użyj aplikacji na pełnym ekranie, gdy niektóre ciężkie wizualnie ekrany są aktywne.</string>
     <!-- Dashboard section titles and chips -->
     <string name="top_artists">Top wykonawcy</string>
     <string name="top_albums">Top albumy</string>
@@ -445,6 +455,8 @@
     <string name="double_">Podwójny</string>
     <string name="triple">Potrójny</string>
     <string name="scan_library">Przeskanuj bibliotekę</string>
+    <string name="scanning_library">Skanowanie biblioteki</string>
+    <string name="getting_music_ready">Przygotowywanie muzyki…</string>
     <string name="scan_library_summary">Sprawdź foldery z muzyką pod kątem nowych lub zmienionych plików i dodaj je do biblioteki. Istniejące wpisy pozostają nienaruszone.</string>
     <string name="refresh_library">Odśwież bibliotekę</string>
     <string name="refresh_library_summary">Wyczyść całą bibliotekę i odbuduj ją od zera. Twoje ulubione, zawsze pominięte i wszystkie statystyki odtwarzania zostaną zachowane i przywrócone po skanowaniu.</string>
@@ -479,7 +491,6 @@
     <string name="show_lyrics_summary">Pokaż jedną linię tekstu piosenki na ekranie odtwarzacza.</string>
     <string name="carousel">Karuzela</string>
     <string name="carousel_ui_desc">Prosty styl odtwarzacza z okładkami w stylu karuzeli.</string>
-    <string name="caps">Wielkie litery</string>
     <string name="bars">Paski</string>
     <string name="current_queue">Kolejka %1$d</string>
     <string name="rename">Zmień nazwę</string>
@@ -498,4 +509,6 @@
     <string name="reduce_animations">Zredukuj animacje</string>
     <string name="reduce_animations_summary">Wyłącz niektóre niepotrzebne animacje w całej aplikacji. Może poprawić wydajność aplikacji na niektórych urządzeniach.\n\nAby wyłączyć animacje przejść, przejdź do panelu %1$s.</string>
     <string name="animations">Animacje</string>
+    <string name="miniplayer_width">Szerokość miniodtwarzacza</string>
+    <string name="miniplayer_width_summary">Dostosuj poziomą szerokość miniodtwarzacza w trybie poziomej orientacji.</string>
 </resources>

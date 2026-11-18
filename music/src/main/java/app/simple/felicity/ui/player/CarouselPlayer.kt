@@ -12,6 +12,7 @@ import app.simple.felicity.decorations.highlight.HighlightTextView
 import app.simple.felicity.decorations.lrc.view.LrcLineView
 import app.simple.felicity.decorations.pager.CarouselTransformers
 import app.simple.felicity.decorations.pager.FelicityPager
+import app.simple.felicity.decorations.ripple.DynamicRippleImageButton
 import app.simple.felicity.decorations.seekbars.WaveformSeekbar
 import app.simple.felicity.decorations.views.FavoriteButton
 import app.simple.felicity.decorations.views.FelicityMediaControls
@@ -45,6 +46,9 @@ class CarouselPlayer : BasePlayerFragment() {
     override val search: View
         get() = binding.search
 
+    override val sleepTimer: DynamicRippleImageButton
+        get() = binding.sleepTimer
+
     override val menu: View
         get() = binding.menu
 
@@ -54,7 +58,7 @@ class CarouselPlayer : BasePlayerFragment() {
     override val pcmInfo: TextView
         get() = binding.pcmInfo
 
-    override val seekbar: WaveformSeekbar
+    override val waveformSeekbar: WaveformSeekbar
         get() = binding.seekbar
 
     override val lyrics: View

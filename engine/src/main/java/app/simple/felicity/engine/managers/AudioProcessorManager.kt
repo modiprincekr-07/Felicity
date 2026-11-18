@@ -9,6 +9,8 @@ import app.simple.felicity.engine.processors.NightModeProcessor
 import app.simple.felicity.engine.processors.SilenceTrimmingProcessor
 import app.simple.felicity.engine.processors.VisualizerProcessor
 import app.simple.felicity.preferences.EqualizerPreferences
+import app.simple.felicity.preferences.VisualizerPreferences
+import app.simple.felicity.shared.models.ParsedBand
 
 /**
  * Manages all audio processing pipelines for the Felicity playback engine.
@@ -32,6 +34,10 @@ import app.simple.felicity.preferences.EqualizerPreferences
  */
 @OptIn(UnstableApi::class)
 class AudioProcessorManager {
+
+    /** Last hardware output latency estimate supplied by the service, before the user offset. */
+    @Volatile
+    private var estimatedLatencyMs: Int = 0
 
     /**
      * Passthrough processor that trims leading and trailing digital silence.
@@ -160,23 +166,11 @@ class AudioProcessorManager {
         nativeDspProcessor.setReverb(mix, decay, damp, size)
     }
 
-    /**
-     * Applies a manual replay gain offset to [nativeDspProcessor].
-     *
-     * This is a simple loudness trim that lets the user level-match tracks mastered at
-     * different loudness targets. It is applied as a linear multiply alongside the preamp
-     * before the DSP chain, so it has no extra processing cost.
-     *
-     * @param db Gain offset in dB in [-15.0, +15.0]. 0.0 = no change.
-     */
-    fun applyReplayGain(db: Float) {
-        nativeDspProcessor.setReplayGainDb(db)
-    }
+
 
     /**
      * Applies the gain parsed from the current track's embedded ReplayGain tag to
-     * [nativeDspProcessor]. This is independent of the manual [applyReplayGain] knob —
-     * both are multiplied together so they coexist without one cancelling the other.
+     * [nativeDspProcessor].
      *
      * Call with 0.0 dB to reset to unity (when auto-RG is disabled or the track has no tag).
      *
@@ -204,11 +198,28 @@ class AudioProcessorManager {
      * Call this whenever the pipeline latency changes: on playback start, on audio format
      * changes, and on audio output device changes (especially Bluetooth connect/disconnect).
      *
-     * @param latencyMs Total audio output latency in milliseconds (>= 0). 0 = no pre-delay.
+     * The user's manual sync offset from [VisualizerPreferences.getLatencyOffsetMs] is added
+     * to [latencyMs] before it is applied, and the result is clamped to >= 0.
+     *
+     * @param latencyMs Estimated audio output latency in milliseconds (>= 0).
      */
     fun applyOutputLatency(latencyMs: Int) {
-        nativeDspProcessor.setOutputLatency(latencyMs)
-        visualizerProcessor.setOutputLatency(latencyMs)
+        estimatedLatencyMs = latencyMs.coerceAtLeast(0)
+        applyEffectiveLatency()
+    }
+
+    /**
+     * Re-applies the last estimated output latency with the current manual sync offset.
+     * Call this when the user changes the offset so it takes effect on the live pipeline.
+     */
+    fun applyVisualizerLatencyOffset() {
+        applyEffectiveLatency()
+    }
+
+    private fun applyEffectiveLatency() {
+        val effectiveMs = (estimatedLatencyMs + VisualizerPreferences.getLatencyOffsetMs()).coerceAtLeast(0)
+        nativeDspProcessor.setOutputLatency(effectiveMs)
+        visualizerProcessor.setOutputLatency(effectiveMs)
     }
 
     /**
@@ -225,6 +236,8 @@ class AudioProcessorManager {
     fun applyEqualizerState() {
         if (EqualizerPreferences.isParametricEqMode()) {
             applyPeqStateFromPreferences()
+            nativeDspProcessor.setBassDb(EqualizerPreferences.getBassDb())
+            nativeDspProcessor.setTrebleDb(EqualizerPreferences.getTrebleDb())
         } else {
             nativeDspProcessor.setEqBands(
                     EqualizerPreferences.getAllBandGains(),
@@ -234,7 +247,6 @@ class AudioProcessorManager {
         }
         nativeDspProcessor.setPreamp(EqualizerPreferences.getPreampDb())
         nativeDspProcessor.eqEnabled = EqualizerPreferences.isEqEnabled()
-        nativeDspProcessor.setReplayGainDb(EqualizerPreferences.getReplayGainDb())
     }
 
     /**
@@ -260,12 +272,13 @@ class AudioProcessorManager {
      *
      * @param bands The PEQ band configuration to apply.
      */
-    fun applyPeqState(bands: List<Triple<Float, Float, Float>>) {
+    fun applyPeqState(bands: List<ParsedBand>) {
         if (bands.isEmpty()) return
-        val gains = FloatArray(bands.size) { bands[it].first }
-        val qValues = FloatArray(bands.size) { bands[it].second }
-        val freqs = FloatArray(bands.size) { bands[it].third }
-        nativeDspProcessor.setPeqBands(gains, freqs, qValues)
+        val gains = FloatArray(bands.size) { bands[it].gain }
+        val qValues = FloatArray(bands.size) { bands[it].q }
+        val freqs = FloatArray(bands.size) { bands[it].frequencyHz }
+        val types = IntArray(bands.size) { bands[it].type }
+        nativeDspProcessor.setPeqBands(gains, freqs, qValues, types)
     }
 
     /**
@@ -278,14 +291,16 @@ class AudioProcessorManager {
      * @param raw The serialized PEQ band string from [EqualizerPreferences].
      * @return A list of (gainDb, qFactor, freqHz) triples, possibly empty.
      */
-    private fun parsePeqBandsRaw(raw: String): List<Triple<Float, Float, Float>> {
+    private fun parsePeqBandsRaw(raw: String): List<ParsedBand> {
         return raw.split("|").mapNotNull { segment ->
             val parts = segment.split(":")
             if (parts.size < 3) return@mapNotNull null
             val gain = parts[0].toFloatOrNull() ?: return@mapNotNull null
             val q = parts[1].toFloatOrNull() ?: return@mapNotNull null
             val freq = parts[2].toFloatOrNull() ?: return@mapNotNull null
-            Triple(gain, q, freq)
+            val color = parts.getOrNull(3)?.toIntOrNull() ?: 0
+            val type = parts.getOrNull(4)?.toIntOrNull() ?: 0
+            ParsedBand(gain, q, freq, color, type)
         }
     }
 }

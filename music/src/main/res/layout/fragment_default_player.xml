@@ -24,8 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.55"
-            app:vizMaxRenderHeight="0.30"
-            app:vizParticlesEnabled="true" />
+            app:vizMaxRenderHeight="0.30" />
 
         <app.simple.felicity.decorations.lrc.view.LrcLineView
             android:id="@+id/lrc"
@@ -42,6 +41,7 @@
         android:layout_height="1px" />
 
     <LinearLayout
+        android:id="@+id/strip_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -81,6 +81,15 @@
             android:layout_height="@dimen/button_size"
             android:layout_marginEnd="@dimen/padding_1"
             android:src="@drawable/ic_search"
+            app:buttonTintType="regular" />
+
+        <app.simple.felicity.decorations.ripple.DynamicRippleImageButton
+            android:id="@+id/sleepTimer"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/button_size"
+            android:layout_marginEnd="@dimen/padding_1"
+            android:src="@drawable/ic_timer"
             app:buttonTintType="regular" />
 
         <app.simple.felicity.decorations.ripple.DynamicRippleImageButton

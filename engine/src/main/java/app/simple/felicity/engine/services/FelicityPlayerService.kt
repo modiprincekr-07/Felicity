@@ -64,6 +64,7 @@ import app.simple.felicity.preferences.EqualizerPreferences
 import app.simple.felicity.preferences.PlayerPreferences
 import app.simple.felicity.preferences.ShufflePreferences
 import app.simple.felicity.preferences.UserInterfacePreferences
+import app.simple.felicity.preferences.VisualizerPreferences
 import app.simple.felicity.repository.constants.MediaConstants
 import app.simple.felicity.repository.database.instances.AudioDatabase
 import app.simple.felicity.repository.models.Audio
@@ -1280,6 +1281,15 @@ class FelicityPlayerService : MediaLibraryService(), SharedPreferences.OnSharedP
                 Log.d(TAG, "Audio decoder preference changed, switching decoder...")
                 switchDecoder()
             }
+            AudioPreferences.FFT_RESOLUTION -> {
+                val newFftSize = AudioPreferences.getFftResolution()
+                Log.d(TAG, "FFT resolution changed to: $newFftSize")
+                audioProcessorManager.visualizerProcessor.updateFftResolution(newFftSize)
+            }
+            VisualizerPreferences.LATENCY_OFFSET_MS -> {
+                Log.d(TAG, "Visualizer latency offset changed to: ${VisualizerPreferences.getLatencyOffsetMs()} ms")
+                audioProcessorManager.applyVisualizerLatencyOffset()
+            }
             AudioPreferences.HIRES_OUTPUT -> {
                 val hiresEnabled = AudioPreferences.isHiresOutputEnabled()
                 Log.d(TAG, "Hi-Res output preference changed to: $hiresEnabled")
@@ -1383,11 +1393,6 @@ class FelicityPlayerService : MediaLibraryService(), SharedPreferences.OnSharedP
                 val db = EqualizerPreferences.getTrebleDb()
                 Log.d(TAG, "Treble gain preference changed to: ${db}dB")
                 audioProcessorManager.applyTreble(db)
-            }
-            EqualizerPreferences.REPLAY_GAIN_DB -> {
-                val db = EqualizerPreferences.getReplayGainDb()
-                Log.d(TAG, "Replay gain preference changed to: ${db}dB")
-                audioProcessorManager.applyReplayGain(db)
             }
             EqualizerPreferences.REVERB_MIX,
             EqualizerPreferences.REVERB_DECAY,

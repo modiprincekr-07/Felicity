@@ -1,52 +1,44 @@
-#### DSP and Sinks
+#### Library
 
-- Fixed delay while pausing the playback in the **AAudio** and **Oboe** sinks.
+- Added affinity based song recommendation system.
+    - This significantly improves the recommendation accuracy by using a probabilistic next song
+      determination based on the user's local activity and this lays the base of the app's
+      recommendation system and this will be used to add features like **Dynamic Playlists** and
+      improved suggestions everywhere in the app.
+
+#### DSP
+
+- Fixed sluggish visualizer updates especially while using the **AudioTrack** sink.
+- Fixed scalar calculation instead of hardware accelerated NEON calculation for the FFT processing.
+  #171
+    - This should save battery and make visualizer even snappier and reacts more accurately to
+      snares and basses.
 
 #### User Interface
 
-- Added **Queue Management** to ask player to manage state before loading the new queue.
-- Added a slider to adjust the **Mini Player** width in the landscape mode, useful if you do not
-  want really wide **Mini Player** in landscape mode.
-- Revamped volume dialog.
-    - Slightly smaller volume knob.
-    - Added tone knobs to adjust the treble and bass on the fly anywhere in the app.
-- Added **Composer** and **Year** filter in the **Search** panel.
-- Added **Shuffle** button in **Folders Hierarchy** to shuffle either the current folder or the
-  current folder and all its subfolders.
+- Added best matches count and indicator in the lyrics panel to indicate the best matched lyrics for
+  the song.
+- Horizontal menu strip for **Equalizer** instead of popup menu.
+- Added **Sleep Timer**.
+    - Added smooth rolling timer picker for timer setup.
+    - Added timer button in the **Dashboard** home.
+    - Added final action to pause or quit the app.
+    - Supports three modes: **Preset**, **Manual**, and **Till This Song**.
 
 #### Bug Fixes
 
-- Fixed artist cache key collision causing incorrect artist images displayed in the **Artist Page
-  **. (by @yossijaki)
-- Fixed keyboard IMEs obscuring the buttons in the **Metadata Editor**. #155
-- Fixed hiding keyboard also hides the current panel happening in **Search**, **Lyrics** and *
-  *Metadata Editor**. #155
-- Fixed albums getting sorted before adding to the queue. #158
-- Fixed artist's songs getting sorted before adding to the queue. #158
-- Fixed **Artists** button not working in **ArtFlow Home** panel.
-- Fixed persistent scanning notification not being removed after the scan is completed.
-- Fixed cancel button not working in the **App Label** dialog.
-- Fixed the text overlapping with the drawn buttons in the list of the media aware layouts.
-    - If you faced the text overlapping with the play or drag icons in the list of the media aware
-      layouts, this fixes that issue.
-- Fixed first line is never highlighted in the **Lyrics** panel.
+- Fixed unnecessary animations in **Visualizer Menu**.
+- Fixed inconsistent presets loading in the **Equalizer** and **DSP**.
+- Fixed elevation glitch in shared popup menus.
 
 #### Improvements
 
-- Hide shuffle button if only one song is in the queue.
-- Use camera optic deform to properly create a yaw bar rotations in the **Waveform Seekbar** to
-  create more natural optic deform effect.
-- Use relevance based search results matching in the **Search** panel.
-- Match filenames and file paths too in the search panel to ensure tagless files are indexed in the
-  search as well.
+- Use duration and other params while matching lyrics to improve the lyrics auto-download accuracy.
 
 #### Changes
 
-- Reorganized the **Player** screens removing the extra queue button.
-- Removed the highlighted lyrics button from the **Player** panels.
+- Changed the default home to **Dashboard**. from **Simple**.
 
-#### Translations
+#### Removed
 
-- Added complete **Ukrainian** translations.
-- Added complete **Persian** translations.
-- Updated **Russian** and **Polish** translations.
+- Removed popup menu from the **Equalizer**.

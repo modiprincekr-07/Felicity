@@ -135,10 +135,7 @@ class Search : PanelFragment() {
                     setMediaItems(songs, position)
                 }
 
-                override fun onSongLongClicked(
-                        audios: MutableList<Audio>,
-                        position: Int,
-                        imageView: ImageView?) {
+                override fun onSongLongClicked(audios: MutableList<Audio>, position: Int, imageView: ImageView?) {
                     openSongsMenu(audios, position, imageView)
                 }
 
@@ -146,21 +143,23 @@ class Search : PanelFragment() {
                     openFragment(AlbumPage.newInstance(albums[position]), AlbumPage.TAG)
                 }
 
-                override fun onArtistClicked(
-                        artist: MutableList<Artist>,
-                        position: Int,
-                        view: View) {
+                override fun onAlbumLongClicked(albums: List<Album>, position: Int, imageView: ImageView?) {
+                    openAlbumMenu(albums[position], imageView)
+                }
+
+                override fun onArtistClicked(artist: MutableList<Artist>, position: Int, view: View) {
                     openFragment(ArtistPage.newInstance(artist[position]), ArtistPage.TAG)
+                }
+
+                override fun onArtistLongClicked(artists: List<Artist>, position: Int, imageView: ImageView?) {
+                    openArtistMenu(artists[position], imageView)
                 }
 
                 override fun onGenreClicked(genre: Genre, view: View) {
                     openFragment(GenrePage.newInstance(genre), GenrePage.TAG)
                 }
 
-                override fun onComposerClicked(
-                        composers: List<Artist>,
-                        position: Int,
-                        view: View) {
+                override fun onComposerClicked(composers: List<Artist>, position: Int, view: View) {
                     openFragment(ComposerPage.newInstance(composers[position]), ComposerPage.TAG)
                 }
 
@@ -180,7 +179,12 @@ class Search : PanelFragment() {
                 return when (adapter.getItemViewType(position)) {
                     AdapterSearch.VIEW_TYPE_SONG_LIST,
                     AdapterSearch.VIEW_TYPE_SONG_GRID,
-                    AdapterSearch.VIEW_TYPE_SONG_LABEL -> 1
+                    AdapterSearch.VIEW_TYPE_SONG_LABEL,
+                    AdapterSearch.VIEW_TYPE_ALBUM_GRID,
+                    AdapterSearch.VIEW_TYPE_ARTIST_GRID,
+                    AdapterSearch.VIEW_TYPE_GENRE_GRID,
+                    AdapterSearch.VIEW_TYPE_COMPOSER_GRID,
+                    AdapterSearch.VIEW_TYPE_YEAR_GRID -> 1
                     else -> spanCount
                 }
             }
@@ -232,6 +236,11 @@ class Search : PanelFragment() {
 
     override fun getShuffleButton(): HighlightTextView {
         return headerBinding.shuffle
+    }
+
+    override fun onShuffleClicked() {
+        super.onShuffleClicked()
+        shuffleMediaItems(searchViewModel.searchResults.value.songs)
     }
 
     private fun updateSearchResults(results: SearchResults) {

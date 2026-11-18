@@ -257,8 +257,20 @@ open class MediaFragment : KeyboardScopedFragment(), MiniPlayerPolicy {
                                 createSongHistoryDatabase(songs)
                                 showMiniPlayer()
                             },
+                            insertAndPlay = {
+                                MediaPlaybackManager.insertAndPlay(songs[position])
+                                showMiniPlayer()
+                            },
                             onMoveToEmptyQueue = {
                                 moveToEmptyQueueAndPlay(songs, position)
+                            },
+                            onPlayNext = {
+                                MediaPlaybackManager.playNext(songs[position])
+                                showMiniPlayer()
+                            },
+                            onAddToQueue = {
+                                MediaPlaybackManager.addToQueue(songs[position])
+                                showMiniPlayer()
                             }
                     )
                     return
@@ -289,7 +301,13 @@ open class MediaFragment : KeyboardScopedFragment(), MiniPlayerPolicy {
      * @param onMoveToEmptyQueue Invoked when the user chooses to preserve the current queue and
      *                           play the new selection from an empty queue slot instead.
      */
-    private fun confirmQueueReplacement(onReplace: () -> Unit, onMoveToEmptyQueue: () -> Unit) {
+    private fun confirmQueueReplacement(
+            onReplace: () -> Unit,
+            onMoveToEmptyQueue: () -> Unit,
+            onPlayNext: () -> Unit,
+            onAddToQueue: () -> Unit,
+            insertAndPlay: () -> Unit
+    ) {
         SimpleDialog.Builder(
                 container = requireContainerView(),
                 inflateBinding = DialogQueueReplaceConfirmationBinding::inflate)
@@ -304,6 +322,21 @@ open class MediaFragment : KeyboardScopedFragment(), MiniPlayerPolicy {
 
                 binding.replace.setOnClickListener {
                     onReplace()
+                    dismiss()
+                }
+
+                binding.playNext.setOnClickListener {
+                    onPlayNext()
+                    dismiss()
+                }
+
+                binding.addToQueue.setOnClickListener {
+                    onAddToQueue()
+                    dismiss()
+                }
+
+                binding.insertAndPlay.setOnClickListener {
+                    insertAndPlay()
                     dismiss()
                 }
             }
@@ -839,6 +872,8 @@ open class MediaFragment : KeyboardScopedFragment(), MiniPlayerPolicy {
                 if (MediaPlaybackManager.getCurrentSong()?.id == audio.id) {
                     MediaPlaybackManager.duck()
                 }
+
+                binding.deleteLyricsCheckbox.isChecked = true // By default, delete lyrics files too
 
                 val title = audio.getProperTitle()
                 val fullText = getString(R.string.delete_audio_summary, title)

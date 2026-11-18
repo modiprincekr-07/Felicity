@@ -62,6 +62,11 @@
     <string name="tiled">Tiled</string>
     <string name="tiled_desc">Dynamic, mosaic-style grid blending album art and library panels.</string>
     <string name="recommended">Recommended</string>
+    <string name="mixes">Mixes</string>
+    <string name="discover">Discover</string>
+    <string name="random_picks">Random Picks</string>
+    <string name="queue_mix">Queue Mix</string>
+    <string name="new_mix">New Mix</string>
     <string name="title">Title</string>
     <string name="album">Album</string>
     <string name="artist">Artist</string>
@@ -132,6 +137,11 @@
     <string name="behavior_desc">Adjust interaction logic and app behavior.</string>
     <string name="number_of_albums">Number of Albums</string>
     <string name="album_art">Album Art</string>
+    <string name="album_art_palette_style">Album Art Palette Style</string>
+    <string name="album_art_palette_style_summary">Choose the style of the album art palette.</string>
+    <string name="album_art_palette_style_pastel">Pastel</string>
+    <string name="album_art_palette_style_chic">Chic</string>
+    <string name="album_art_palette_style_retro">Retro</string>
     <string name="shadows">Shadows</string>
     <string name="album_art_shadows_summary">Toggle shadows below the album arts.</string>
     <string name="album_art_rounded_corners_summary">Toggle corner radius on album arts. If enabled the Corner Radius value is used to round the corners.</string>
@@ -232,7 +242,9 @@
     <string name="confirm_queue_replacement">Confirm Queue Replacement</string>
     <string name="confirm_queue_replacement_summary">Ask before replacing your current playback queue when you start playing songs from folders, albums, artists, or playlists.</string>
     <string name="replace_queue_title">Replace Playing Queue?</string>
-    <string name="replace_queue_message">A queue is already loaded. Replace it with the new selection, or move the new selection to an empty queue slot instead?</string>
+    <string name="replace_queue_message">A queue is already loaded. What would you like to do with the new selection?</string>
+    <string name="for_this_song_only">For this song only</string>
+    <string name="for_the_queue">For the queue</string>
     <string name="replace">Replace</string>
     <string name="move_to_empty_queue">Move to Empty Queue</string>
     <string name="moved_to_empty_queue">Moved to Queue %1$d</string>
@@ -244,6 +256,9 @@
     <string name="shuffle_this_folder_only">This Folder Only</string>
     <string name="shuffle_include_subfolders">Include Sub-folders</string>
     <string name="no_songs_to_shuffle">No songs found to shuffle.</string>
+
+    <string name="play_scope_title">Play Songs?</string>
+    <string name="play_scope_message">Play only the songs directly inside this folder, or include every song found in its sub-folders too?</string>
 
     <string name="sync_adjust">Sync Adjust</string>
     <string name="accessibility">Accessibility</string>
@@ -306,7 +321,6 @@
     <string name="files">Files</string>
     <string name="style">Style</string>
     <string name="latency">Latency</string>
-    <string name="particles">Particles</string>
     <string name="slide">Slide</string>
     <string name="typewriting">Typewriting</string>
     <string name="no_effect">No Effect</string>
@@ -317,12 +331,17 @@
     <string name="depth">Depth</string>
     <string name="drift">Drift</string>
     <string name="presets">Presets</string>
+    <string name="presets_desc">Saved and built-in presets</string>
+    <string name="headphone_profiles">Headphone Profiles</string>
     <string name="visualizer">Visualizer</string>
     <string name="metadata">Metadata</string>
     <string name="show_album_artists">Show Album Artists</string>
     <string name="musicbrainz_enabled">Extra Info from MusicBrainz</string>
     <string name="musicbrainz_enabled_summary">Fetch info from the MusicBrainz open database. Requires an internet connection. Disabling stops all MusicBrainz network requests.</string>
     <string name="show_album_artists_summary">Show album artists instead of artists in the artists field of the lists in the app.</string>
+    <string name="artist_whitelist">Artist Whitelist</string>
+    <string name="artist_whitelist_desc">Manage artists that should not be split.</string>
+    <string name="enter_artist_name">Enter Artist Name</string>
     <string name="copy">Copy</string>
     <string name="edit_metadata">Edit Metadata</string>
     <string name="metadata_saved">Metadata saved successfully.</string>
@@ -444,6 +463,8 @@
     <string name="done">Done</string>
     <string name="manage_music_folders">Manage Music Folders</string>
     <string name="manage_music_folders_desc">Manage local directories for library indexing.</string>
+    <string name="immersive_mode">Immersive Mode</string>
+    <string name="immersive_mode_summary">Use app in full screen when some visuals heavy screens are active.</string>
 
     <!-- Dashboard section titles and chips -->
     <string name="top_artists">Top Artists</string>
@@ -468,6 +489,16 @@
     <string name="double_">Double</string>
     <string name="triple">Triple</string>
     <string name="scan_library">Scan Library</string>
+    <string name="scanning_library">Scanning Library</string>
+    <string name="getting_music_ready">Getting your music ready…</string>
+    <string name="scan_state_cleaning">Removing songs that are no longer available…</string>
+    <string name="scan_state_checking">Checking your existing library…</string>
+    <string name="scan_state_discovering">Looking for music in your folders…</string>
+    <string name="scan_state_discovering_count">Looking for music… %1$d found</string>
+    <string name="scan_state_reading_indeterminate">Reading song details…</string>
+    <string name="scan_state_reading">Reading song details… %1$d of %2$d</string>
+    <string name="scan_state_saving">Saving to your library…</string>
+    <string name="scan_state_finishing">Finishing up…</string>
     <string name="scan_library_summary">Check your music folders for new or changed files and add them to the library. Existing entries are kept intact.</string>
     <string name="refresh_library">Refresh Library</string>
     <string name="refresh_library_summary">Wipe the entire library and rebuild it from scratch. Your favorites, always skipped and all playback stats are preserved and restored after the scan.</string>
@@ -478,6 +509,8 @@
     <string name="about_album">About the Album</string>
     <string name="search_metadata">Search</string>
     <string name="synced">Synced</string>
+    <string name="instrumental" translatable="false">Instrumental</string>
+    <string name="word_sync" translatable="false">Word Sync</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="active_since">Active since %1$s</string>
@@ -503,8 +536,10 @@
     <string name="show_lyrics_summary">Show single line lyrics on player screen.</string>
     <string name="carousel">Carousel</string>
     <string name="carousel_ui_desc">Simple player style with carousel type album arts.</string>
-    <string name="caps">Caps</string>
     <string name="bars">Bars</string>
+    <string name="wave">Wave</string>
+    <string name="blocks">Blocks</string>
+    <string name="spectrum_colors">Spectrum Colors</string>
     <string name="current_queue">Queue %1$d</string>
     <string name="rename">Rename</string>
     <string name="clear_queue">Clear</string>
@@ -513,6 +548,8 @@
     <string name="usb_dac_control_summary">Use app\'s internal DAC driver to create a direct audio output via DAC.</string>
     <string name="stack_media_controls">Stack Media Controls</string>
     <string name="stack_media_controls_summary">Stack media controls with waveform to create more vertical space.</string>
+    <string name="show_forward_rewind_buttons">Show Forward/Rewind Buttons</string>
+    <string name="show_forward_rewind_buttons_summary">Show forward and rewind buttons on the player screen.</string>
     <string name="pages">Pages</string>
     <string name="show_songs_first">Show Songs First</string>
     <string name="show_songs_first_summary">Show the song list before the album, artist, and genre sections on detail pages.</string>
@@ -524,4 +561,30 @@
     <string name="animations">Animations</string>
     <string name="miniplayer_width">Mini Player Width</string>
     <string name="miniplayer_width_summary">Adjust horizontal width of the Mini Player in landscape mode.</string>
+    <string name="fft_resolution">FFT Resolution</string>
+    <string name="fft_resolution_summary">Higher resolution improves frequency accuracy but consumes more CPU and may affect rendering framerate.</string>
+    <string name="sleep_timer">Sleep Timer</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="till_this_song">Till This Song</string>
+    <string name="final_action">Final Action</string>
+    <string name="final_action_summary">Final action taken after the countdown finishes.</string>
+    <string name="volume_knob_position">Volume Knob Position</string>
+    <string name="volume_knob_position_summary">Change the position of the volume knob.</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="center">Center</string>
+    <string name="weather_effect">Weather Effect</string>
+    <string name="weather_effect_summary">Show a weather effect like snow or autumn leaves on the background.</string>
+    <string name="off">Off</string>
+    <string name="winter">Winter</string>
+    <string name="autumn">Autumn</string>
+    <string name="summer">Summer</string>
+    <string name="gain_db">Gain (dB)</string>
+    <string name="frequency_hz">Frequency (Hz)</string>
+    <string name="import_preset">Import Preset</string>
+
 </resources>
